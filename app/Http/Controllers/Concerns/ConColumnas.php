@@ -19,6 +19,22 @@ trait ConColumnas
         return array_values(array_diff(array_keys($data), Schema::getColumnListing($tabla)));
     }
 
+    /**
+     * Regla para el campo "paciente": debe ser uno de los pacientes registrados en Pacientes.
+     * $actual = valor que ya tenía el registro al editarlo (se acepta aunque sea un nombre antiguo).
+     */
+    protected function reglaPaciente(?string $actual = null): array
+    {
+        return ['required', 'string', 'max:150', function ($atributo, $valor, $fallo) use ($actual) {
+            if ($actual !== null && $valor === $actual) {
+                return;
+            }
+            if (!\App\Models\Paciente::query()->where('nombre', $valor)->exists()) {
+                $fallo('Elige un paciente de la lista. Si no aparece, primero regístralo en Pacientes.');
+            }
+        }];
+    }
+
     /** Elimina un registro del modelo indicado y vuelve a la lista con un mensaje. */
     protected function borrar(string $modelo, string $pk, $id, string $ruta, string $msg)
     {

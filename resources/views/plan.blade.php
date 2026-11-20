@@ -8,6 +8,7 @@
 @section('sidebar_tabs')
 @include('layouts.tab', ['id' => 'nuevo', 'icono' => 'bi-journal-plus', 'texto' => 'Nuevo Plan', 'activo' => true])
 @include('layouts.tab', ['id' => 'lista', 'icono' => 'bi-list-ul', 'texto' => 'Planes Registrados'])
+@include('layouts.tab', ['id' => 'guias', 'icono' => 'bi-journal-bookmark-fill', 'texto' => 'Guías e Indicadores'])
 @endsection
 
 @section('content')
@@ -34,10 +35,7 @@
                     
                     <div class="row g-3">
                         <div class="col-md-12 mb-3">
-                            <div class="input-group">
-                                <span class="input-group-text input-grupo-texto">Paciente:</span>
-                                <input type="text" name="paciente" class="form-control" placeholder="Nombre completo del paciente">
-                            </div>
+                            @include('layouts.paciente_select', ['clase' => ''])
                         </div>
 
                         <div class="col-md-6 mb-3">
@@ -144,7 +142,40 @@
             </div>
         </div>
     </div>
+
 </div>
+        <div class="tab-pane fade" id="panel-guias" role="tabpanel">
+@php
+$gTitulo = 'Guías e indicadores de Planes';
+$gIntro  = 'Cómo armar un plan de intervención claro para la familia.';
+$gInd = [
+    ['Planes registrados', $planes->count(), 'bi-journal-text'],
+    ['Pacientes con plan', $planes->pluck('paciente')->filter()->unique()->count(), 'bi-people-fill'],
+    ['Con terapia comunicativa', $planes->filter(fn ($p) => filled($p->terapia_comunicativa))->count(), 'bi-chat-dots-fill'],
+    ['Con terapia sensorial', $planes->filter(fn ($p) => filled($p->terapia_sensorial))->count(), 'bi-hand-index-thumb-fill'],
+    ['Con terapia de aprendizaje', $planes->filter(fn ($p) => filled($p->terapia_aprendizaje))->count(), 'bi-mortarboard-fill'],
+];
+$gGuias = [
+    ['Plan de intervención', 'bi-journal-text', [
+        'Un plan por paciente, dirigido a la madre, el padre o el tutor.',
+        'Define actividades claras para hacer en casa en cada área.',
+        'Usa un lenguaje sencillo, sin tecnicismos.',
+    ]],
+    ['Áreas de terapia', 'bi-puzzle', [
+        '<strong>Comunicativa:</strong> lenguaje y comunicación funcional.',
+        '<strong>Sensorial</strong> y <strong>ocupacional:</strong> regulación y autonomía en la vida diaria.',
+        '<strong>Aprendizaje</strong> y <strong>atención y concentración:</strong> hábitos y tareas escolares.',
+        '<strong>Educación emocional:</strong> manejo de emociones y conducta.',
+    ]],
+    ['Cómo redactar objetivos', 'bi-bullseye', [
+        'Que sean observables y medibles.',
+        'Incluye la frecuencia, por ejemplo 10 minutos diarios.',
+        'Revisa el avance en cada sesión y ajusta el plan.',
+    ]],
+];
+@endphp
+@include('layouts.guias', ['titulo' => $gTitulo, 'intro' => $gIntro, 'indicadores' => $gInd, 'guias' => $gGuias])
+        </div>
 </div>
 
     <!-- Bootstrap JS Bundle -->

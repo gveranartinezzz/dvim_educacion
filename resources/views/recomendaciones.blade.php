@@ -9,7 +9,7 @@
 @include('layouts.tab', ['id' => 'enviar', 'icono' => 'bi-send-fill', 'texto' => 'Enviar Nota', 'activo' => true])
 @include('layouts.tab', ['id' => 'banco', 'icono' => 'bi-archive-fill', 'texto' => 'Banco de Estrategias'])
 @include('layouts.tab', ['id' => 'filtros', 'icono' => 'bi-funnel-fill', 'texto' => 'Búsqueda por Grado'])
-@include('layouts.tab', ['id' => 'guias', 'icono' => 'bi-book-fill', 'texto' => 'Guías de Adecuación'])
+@include('layouts.tab', ['id' => 'guias', 'icono' => 'bi-journal-bookmark-fill', 'texto' => 'Guías e Indicadores'])
 @endsection
 
 @section('content')
@@ -23,7 +23,8 @@
     
 
     <!-- CONTENEDOR DE PESTAÑAS -->
-    <div class="tab-content container pb-5" id="v-pills-tabContent">
+    <div class="container my-4">
+    <div class="tab-content" id="v-pills-tabContent">
         
         <!-- ========================================================= -->
         <!-- PESTAÑA 1: ENVIAR NOTA / REGISTRAR (id: panel-enviar)     -->
@@ -42,10 +43,7 @@
                             
                             <span class="section-label">Identificación del Alumno</span>
                             
-                            <div class="input-group mb-2">
-                                <span class="input-group-text">Paciente:</span>
-                                <input type="text" name="paciente" class="form-control" placeholder="Nombre completo" required>
-                            </div>
+                            @include('layouts.paciente_select', ['clase' => 'mb-2'])
 
                             <div class="row mb-3">
                                 <div class="col-md-6">
@@ -300,6 +298,7 @@
             </div>
         </div>
 
+    </div>
     </div>
 
 <!-- SCRIPTS JAVASCRIPT -->

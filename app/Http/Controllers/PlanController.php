@@ -19,7 +19,7 @@ class PlanController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate(['paciente' => 'required|string|max:150']);
+        $request->validate(['paciente' => $this->reglaPaciente()]);
 
         Plan::query()->create([
             'paciente'                       => $request->paciente,
@@ -47,7 +47,7 @@ class PlanController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'paciente' => 'required|string|max:150',
+            'paciente' => $this->reglaPaciente(Plan::query()->where('id', $id)->value('paciente')),
             'padre'    => 'required|string|max:150',
             'madre'    => 'required|string|max:150',
         ]);

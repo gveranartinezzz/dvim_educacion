@@ -33,9 +33,15 @@ body { background-color: var(--divm-fondo); }
 }
 
 /* ---------- 2. ESTRUCTURA Y MENÚ LATERAL ---------- */
-.wrapper { display: flex; width: 100%; align-items: stretch; min-height: calc(100vh - 60px); }
+/* --nav-h la calcula un script en layouts/app.blade.php (altura real del menú superior) */
+:root { --nav-h: 64px; }
 
+.wrapper { display: flex; width: 100%; align-items: stretch; min-height: calc(100vh - var(--nav-h)); }
+
+/* El menú lateral se queda fijo al hacer scroll: el título, los botones y
+   "Cerrar Sesión" siempre quedan a la vista aunque la página sea larga. */
 #sidebar {
+    flex: 0 0 260px;
     min-width: 260px;
     max-width: 260px;
     background: var(--divm-vino);
@@ -43,9 +49,21 @@ body { background-color: var(--divm-fondo); }
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    position: sticky;
+    top: var(--nav-h);
+    align-self: flex-start;
+    height: calc(100vh - var(--nav-h));
+    overflow-y: auto;
+    overflow-x: hidden;       /* nunca barra de scroll horizontal en el menú */
 }
-#sidebar .components { padding: 16px 12px; margin: 0; }
-#sidebar .dropdown-toggle { font-weight: 700; text-decoration: none; padding: 8px 6px; }
+#sidebar .components { padding: 16px 12px; margin: 0; width: 100%; min-width: 0; flex-wrap: nowrap; }
+#sidebar .components > li { min-width: 0; }
+#sidebar .dropdown-toggle { font-weight: 700; text-decoration: none; padding: 8px 6px; cursor: pointer; gap: 8px; }
+/* títulos largos ("Módulo Recomendaciones") se parten en vez de empujar el menú más ancho que 260px */
+#sidebar .dropdown-toggle > span { min-width: 0; overflow-wrap: anywhere; line-height: 1.25; }
+#sidebar .dropdown-toggle::after { flex-shrink: 0; margin-left: auto; }
+#sidebar #dynamicSubmenu { padding-right: 0; }
+#sidebar #dynamicSubmenu .nav-item { width: 100%; }
 
 .side-tab-btn {
     display: block;
@@ -55,17 +73,40 @@ body { background-color: var(--divm-fondo); }
     border-radius: 6px;
     text-decoration: none;
     transition: .2s;
+    line-height: 1.25;
+    white-space: normal;      /* los textos largos ("Altas / Bajas (Estatus)") se parten en vez de salirse */
+    overflow-wrap: anywhere;
 }
 .side-tab-btn:hover { color: #fff !important; background: rgba(255,255,255,.1); }
+.side-tab-btn:focus-visible { outline: 2px solid var(--divm-claro); outline-offset: 2px; }
 .side-tab-btn.active { color: #fff !important; background-color: var(--divm-rosa) !important; font-weight: bold; }
 
-.sidebar-footer { background: rgba(0,0,0,.15); border-top: 1px solid rgba(255,255,255,.1); }
+.sidebar-footer { background: rgba(0,0,0,.15); border-top: 1px solid rgba(255,255,255,.1); flex-shrink: 0; }
 
-#content { width: 100%; min-width: 0; padding: 30px; background-color: transparent; }
+#content { flex: 1 1 auto; width: 100%; min-width: 0; padding: 30px; background-color: transparent; }
 
 @media (max-width: 768px) {
     .wrapper { flex-direction: column; }
-    #sidebar { min-width: 100%; max-width: 100%; }
+    /* En celular el menú pasa arriba, ya no es fijo ni ocupa toda la pantalla */
+    #sidebar {
+        position: static;
+        flex: 0 0 auto;
+        min-width: 100%;
+        max-width: 100%;
+        height: auto;
+        overflow-y: visible;
+    }
+    #sidebar .components { padding: 10px 12px; }
+    .sidebar-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        text-align: left !important;
+        padding: 8px 12px !important;
+    }
+    .sidebar-footer .bi-person-circle { display: none; }
+    .sidebar-footer .btn-sidebar-logout { width: auto !important; margin-top: 0 !important; }
     #content { padding: 15px; }
 }
 @media print {
@@ -148,6 +189,42 @@ body { background-color: var(--divm-fondo); }
 /* tablas */
 .table thead th { color: #84063e; border-bottom: 2px solid #84063e; font-weight: bold; }
 .table > :not(caption) > * > * { vertical-align: middle; }
+
+/* Regla de contraste: fondo oscuro -> letras claras · fondo claro -> letras oscuras.
+   La regla de arriba pinta de vino todos los <th>; en los encabezados oscuros
+   (table-dark) eso dejaba vino sobre vino. Aquí se corrige. */
+.table thead.table-dark th,
+.table .table-dark th,
+.table-dark > :not(caption) > * > * {
+    background-color: #580c33;
+    color: #ffffff;
+    border-bottom: 0;
+}
+.table thead.table-light th { background-color: #f7f1f5; color: #54063e; }
+
+/* Los colores de .badge-viernes y .tc-4 se oscurecieron (más abajo) para que el texto blanco se lea. */
+
+/* Amarillo de Bootstrap (#ffc107) sobre fondo claro casi no se lee -> ámbar oscuro.
+   Sobre fondo oscuro (tarjeta de grado activa) se usa amarillo claro. */
+.text-warning { color: #b45309 !important; }
+.grado-card.active-filter .text-warning,
+.header-divm .text-warning,
+.modal-header .text-warning { color: #ffd166 !important; }
+/* texto atenuado: más oscuro sobre claro, más claro sobre oscuro */
+.text-muted { color: #5f5560 !important; }
+.header-divm .text-muted, .modal-header .text-muted,
+.grado-card.active-filter .text-muted { color: #ffc2e4 !important; }
+/* componentes de fondo oscuro: todo su contenido en claro */
+.header-divm, .header-divm h1, .header-divm h2, .header-divm h3, .header-divm h4, .header-divm h5, .header-divm h6,
+.modal-header .modal-title, .card-header[style*="#580c33"], .card-header[style*="#54063e"] { color: #fff; }
+/* insignias con fondo oscuro puesto en línea: letra blanca */
+.badge[style*="#84063e"], .badge[style*="#54063e"], .badge[style*="#580c33"] { color: #fff; }
+/* insignia clara de Bootstrap: letra oscura */
+.badge.bg-light, .badge.bg-warning { color: #3b0a2b !important; }
+/* botón de peligro "Cerrar sesión" del menú: blanco sobre rojo */
+.btn-danger, .btn-danger:hover { color: #fff; }
+/* alerta de conflicto (fondo amarillo claro): letra oscura */
+.conflict-alert, .conflict-alert * { color: #4a3300; }
 
 /* encabezados oscuros que traían algunas tablas y ventanas */
 thead[style*="background"] th { background: #580c33 !important; color: #fff !important; border-bottom: 0; }
@@ -255,7 +332,7 @@ thead[style*="background"] th { background: #580c33 !important; color: #fff !imp
 .tc-1 { background: #54063e; }
 .tc-2 { background: #0077b6; }
 .tc-3 { background: #2d6a4f; }
-.tc-4 { background: #e76f51; }
+.tc-4 { background: #c2410c; }
 .tc-5 { background: #6d6875; }
 .tc-6 { background: #264653; }
 .tc-7 { background: #a4161a; }
@@ -272,7 +349,7 @@ thead[style*="background"] th { background: #580c33 !important; color: #fff !imp
     background: #2d6a4f;
 }
 .badge-viernes {
-    background: #e76f51;
+    background: #c2410c;
 }
 .badge-sabado {
     background: #6d6875;
@@ -563,7 +640,7 @@ thead[style*="background"] th { background: #580c33 !important; color: #fff !imp
         }
 #divm-sugerencias p {
             font-size: 11px;
-            color: #999;
+            color: #6b5a66;
             text-align: center;
             margin: 0 0 2px;
         }
@@ -643,3 +720,15 @@ thead[style*="background"] th { background: #580c33 !important; color: #fff !imp
 .code-inputs input:focus { border-color: #84063e; box-shadow: 0 0 0 3px rgba(132,6,62,.15); }
 .correo-hint { background: #f7f1f5; border-left: 4px solid #84063e; border-radius: 8px; padding: 10px 15px; font-size: .88rem; color: #54063e; margin-bottom: 12px; }
 #contador { font-weight: 800; color: #84063e; font-size: 1.1rem; }
+
+/* ---------- Guías e indicadores (panel igual en todos los módulos) ---------- */
+/* fondo claro -> letras oscuras */
+/* cuadrícula que se ajusta sola: 3, 4 o 5 indicadores en una fila; en celular se apilan */
+.indicadores { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 1rem; }
+.indicador { background: #f7f1f5; border-left: 5px solid var(--divm-rosa); border-radius: 10px; padding: 14px 16px; height: 100%; color: #54063e; }
+.indicador i { font-size: 1.3rem; color: #84063e; }
+.indicador-valor { font-size: 1.9rem; font-weight: 800; line-height: 1.1; color: #54063e; }
+.indicador-etiqueta { font-size: .82rem; font-weight: 600; color: #4a2a3f; }
+.guia-card { border: 1px solid #f0e0ec; border-radius: 10px; }
+.guia-card .card-header { background: #f7f1f5; color: #84063e; font-weight: 700; border-bottom: 1px solid #f0e0ec; }
+.guia-card .card-body { color: #2d1a28; }

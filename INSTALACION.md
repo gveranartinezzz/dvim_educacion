@@ -41,6 +41,17 @@ Diseño: membrete CENTRO DIVM + barra rosa con el título, igual que tu proyecto
 - **Apagarla temporalmente para todos:** `DOS_PASOS=false` en el `.env`.
 - **Por usuario:** Usuarios → Editar → interruptor "Verificación en dos pasos".
 
+## Recuperar contraseña
+En el login, el enlace **"¿Olvidaste tu contraseña? Recupérala aquí"** lleva a `/recuperar`.
+1. El usuario escribe su correo y se le manda un código de 6 dígitos (vence en 10 min, 5 intentos, reenvío cada 60 s).
+2. Escribe el código y su contraseña nueva (mínimo 6 caracteres) y ya puede iniciar sesión.
+
+- No usa la base de datos: el código se guarda cifrado en la caché (`CACHE_STORE=file` en el `.env`). No hay que correr migraciones ni SQL.
+- Solo se manda código a usuarios **Activos**. La respuesta es la misma exista o no el correo.
+- **Probar sin correo real:** deja `MAIL_MAILER=log`; el código aparece en `storage/logs/laravel.log`.
+- **Correo real:** las mismas líneas `MAIL_*` de la verificación en dos pasos.
+- Si el correo no llega, revisa `storage/logs/laravel.log`: ahí queda el error de envío.
+
 ## Asistente del Informe
 Pon tu clave NUEVA en `.env`: `GROQ_API_KEY=...` (la clave nunca llega al navegador).
 

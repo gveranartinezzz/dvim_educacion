@@ -10,6 +10,7 @@
 @include('layouts.tab', ['id' => 'enviar', 'icono' => 'bi-calendar-plus', 'texto' => 'Asignar Horario', 'activo' => true])
 @include('layouts.tab', ['id' => 'banco', 'icono' => 'bi-clock-history', 'texto' => 'Historial'])
 @include('layouts.tab', ['id' => 'distribucion', 'icono' => 'bi-grid-3x3-gap-fill', 'texto' => 'Distribución'])
+@include('layouts.tab', ['id' => 'guias', 'icono' => 'bi-journal-bookmark-fill', 'texto' => 'Guías e Indicadores'])
 @endsection
 
 @section('content')
@@ -45,10 +46,7 @@
 @csrf
 <span class="section-label">Información</span>
 
-<div class="input-group mb-3">
-    <span class="input-group-text"><i class="bi bi-person me-1"></i> Paciente</span>
-    <input type="text" name="paciente" class="form-control" placeholder="Nombre del niño/a" value="{{ old('paciente') }}" required>
-</div>
+@include('layouts.paciente_select')
 
 <div class="input-group mb-4">
     <span class="input-group-text"><i class="bi bi-person-badge me-1"></i> Terapeuta</span>
@@ -210,7 +208,38 @@
 </div>
 
 </div></div></div>
+
 </div>
+        <div class="tab-pane fade" id="panel-guias" role="tabpanel">
+@php
+$gTitulo = 'Guías e indicadores de Distribución';
+$gIntro  = 'Reglas para asignar horarios sin empalmes.';
+$gInd = [
+    ['Horarios registrados', count($horarios), 'bi-calendar-week-fill'],
+    ['Terapeutas', count($terapeutas), 'bi-person-workspace'],
+    ['Días de atención', count($dias), 'bi-calendar-check-fill'],
+];
+$gGuias = [
+    ['Asignar un horario', 'bi-calendar-plus', [
+        'Elige terapeuta, paciente y día de la semana.',
+        'Indica la hora de inicio y la de fin.',
+        'La hora de fin debe ser posterior a la de inicio.',
+        'Se atiende de lunes a sábado.',
+    ]],
+    ['Empalmes', 'bi-exclamation-triangle', [
+        'Un terapeuta <strong>no puede tener dos horarios que se traslapen</strong> el mismo día.',
+        'Si hay conflicto, el sistema avisa y no guarda el horario.',
+        'Cambia la hora o el día e inténtalo de nuevo.',
+    ]],
+    ['Buenas prácticas', 'bi-lightbulb', [
+        'Deja un margen entre sesiones para el cambio de paciente.',
+        'Revisa la distribución semanal para equilibrar la carga.',
+        'Elimina los horarios que ya no se usen.',
+    ]],
+];
+@endphp
+@include('layouts.guias', ['titulo' => $gTitulo, 'intro' => $gIntro, 'indicadores' => $gInd, 'guias' => $gGuias])
+        </div>
 
 </div>
 

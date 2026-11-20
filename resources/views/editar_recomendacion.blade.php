@@ -15,10 +15,7 @@
                     <input type="hidden" name="id" value="{{ $rec->id }}">
                     
                     <span class="section-label">Identificación del Alumno</span>
-                    <div class="input-group mb-2">
-                        <span class="input-group-text">Paciente:</span>
-                        <input type="text" name="paciente" class="form-control" value="{{ $rec->paciente }}" required>
-                    </div>
+                    @include('layouts.paciente_select', ['valor' => $rec->paciente, 'clase' => 'mb-2'])
 
                     <div class="row mb-3">
                         <div class="col-md-6"><div class="input-group"><span class="input-group-text">Madre:</span><input type="text" name="madre" class="form-control" value="{{ $rec->madre }}" required></div></div>

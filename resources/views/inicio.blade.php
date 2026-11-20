@@ -50,6 +50,7 @@
                     
                     <form action="{{ route('login.post') }}" method="POST">
                         @csrf
+                        @if(session('ok'))<div class="alert alert-success py-2">{{ session('ok') }}</div>@endif
                         @if(session('error'))<div class="alert alert-danger py-2">{{ session('error') }}</div>@endif
                         @if($errors->any())<div class="alert alert-danger py-2">{{ $errors->first() }}</div>@endif
                         <div class="mb-3">
@@ -64,7 +65,7 @@
                     </form>
 
                     <div class="text-center mt-3" style="font-size: 14px;">
-                        ¿Olvidaste tu contraseña? <span style="color: #84063e; font-weight: bold;">Solicita el cambio a un administrador.</span>
+                        ¿Olvidaste tu contraseña? <a href="{{ route('recuperar') }}" style="color: #84063e; font-weight: bold;">Recupérala aquí.</a>
                     </div>
                 </div>
             </div>

@@ -24,7 +24,9 @@
             <!-- TÍTULO DEL MÓDULO (cada página lo define con @section('modulo')) -->
             <a href="#dynamicSubmenu"
                data-bs-toggle="collapse"
+               role="button"
                aria-expanded="true"
+               aria-controls="dynamicSubmenu"
                class="dropdown-toggle text-white d-flex justify-content-between align-items-center">
                 <span>
                     <i class="bi bi-grid-1x2-fill me-2"></i>

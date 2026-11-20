@@ -13,6 +13,7 @@ use App\Http\Controllers\HorarioController;
 use App\Http\Controllers\PdfController;
 use App\Http\Controllers\ChatbotController;
 use App\Http\Controllers\VerificacionController;
+use App\Http\Controllers\RecuperacionController;
 
 // ---------- Login (público) ----------
 Route::get('/', fn () => redirect()->route('login'));
@@ -24,6 +25,13 @@ Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::get('/verificar', [VerificacionController::class, 'form'])->name('verificar');
 Route::post('/verificar', [VerificacionController::class, 'verificar'])->middleware('throttle:10,1')->name('verificar.post');
 Route::post('/verificar/reenviar', [VerificacionController::class, 'reenviar'])->middleware('throttle:5,1')->name('verificar.reenviar');
+
+// Recuperar contraseña (código de 6 dígitos por correo)
+Route::get('/recuperar', [RecuperacionController::class, 'form'])->name('recuperar');
+Route::post('/recuperar', [RecuperacionController::class, 'enviar'])->middleware('throttle:5,1')->name('recuperar.enviar');
+Route::get('/recuperar/codigo', [RecuperacionController::class, 'formCodigo'])->name('recuperar.codigo');
+Route::post('/recuperar/codigo', [RecuperacionController::class, 'restablecer'])->middleware('throttle:10,1')->name('recuperar.restablecer');
+Route::post('/recuperar/reenviar', [RecuperacionController::class, 'reenviar'])->middleware('throttle:3,1')->name('recuperar.reenviar');
 
 $soloSesion = function ($request, $next) {
     if (!session()->has('id_usuario')) {

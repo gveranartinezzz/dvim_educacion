@@ -9,6 +9,7 @@
 @include('layouts.tab', ['id' => 'enviar', 'icono' => 'bi-journal-plus', 'texto' => 'Registrar Avance', 'activo' => true])
 @include('layouts.tab', ['id' => 'historial', 'icono' => 'bi-clock-history', 'texto' => 'Historial de Sesiones'])
 @include('layouts.tab', ['id' => 'expediente', 'icono' => 'bi-folder2-open', 'texto' => 'Expediente Pedagógico'])
+@include('layouts.tab', ['id' => 'guias', 'icono' => 'bi-journal-bookmark-fill', 'texto' => 'Guías e Indicadores'])
 @endsection
 
 @section('content')
@@ -251,7 +252,6 @@
         <!-- ========================================== -->
 
         <div class="tab-pane fade" id="panel-historial" role="tabpanel">
-<div class="tab-pane fade" id="panel-expediente" role="tabpanel">
 <div class="mt-5">
 
             <div class="row justify-content-center">
@@ -323,12 +323,12 @@
 
         </div>
 </div>
-</div>
 
         <!-- ========================================== -->
         <!-- EXPEDIENTE -->
         <!-- ========================================== -->
 
+        <div class="tab-pane fade" id="panel-expediente" role="tabpanel">
         <div class="mt-5">
 
             <div class="row justify-content-center">
@@ -370,6 +370,40 @@
 
             </div>
 
+        </div>
+        </div>
+
+        <div class="tab-pane fade" id="panel-guias" role="tabpanel">
+@php
+$gTitulo = 'Guías e indicadores de Avances';
+$gIntro  = 'Cómo registrar cada sesión y leer el progreso del paciente.';
+$gInd = [
+    ['Sesiones registradas', $avances->count(), 'bi-journal-check'],
+    ['Asistió', $avances->where('estatus_sesion', 'Asistió')->count(), 'bi-check-circle-fill'],
+    ['Faltas', $avances->whereIn('estatus_sesion', ['Falta Justificada', 'Falta Injustificada'])->count(), 'bi-x-circle-fill'],
+    ['Canceladas', $avances->where('estatus_sesion', 'Cancelada')->count(), 'bi-slash-circle-fill'],
+];
+$gGuias = [
+    ['Registro de la sesión', 'bi-journal-plus', [
+        'Describe las <strong>actividades</strong> realizadas en la intervención.',
+        'Anota la conducta y el estado emocional observados.',
+        'Registra los logros y el nivel de autonomía.',
+        'Deja indicaciones claras para la familia.',
+    ]],
+    ['Estatus de la sesión', 'bi-clipboard-check', [
+        '<strong>Asistió:</strong> la sesión se realizó.',
+        '<strong>Falta justificada:</strong> el paciente no asistió y avisó el motivo.',
+        '<strong>Falta injustificada:</strong> no asistió y no avisó.',
+        '<strong>Cancelada:</strong> la sesión no se llevó a cabo.',
+    ]],
+    ['Indicadores de progreso', 'bi-graph-up-arrow', [
+        'Compara la sesión actual con la anterior.',
+        'Autonomía: necesita ayuda total, ayuda parcial o lo hace solo.',
+        'Revisa el expediente pedagógico antes de cada sesión.',
+    ]],
+];
+@endphp
+@include('layouts.guias', ['titulo' => $gTitulo, 'intro' => $gIntro, 'indicadores' => $gInd, 'guias' => $gGuias])
         </div>
 
     </div>

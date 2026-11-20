@@ -30,7 +30,7 @@ class HorarioController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'paciente'    => 'required|string|max:150',
+            'paciente'    => $this->reglaPaciente(),
             'id_usuario'  => 'required|integer',
             'dia_semana'  => 'required|in:Lunes,Martes,Miércoles,Jueves,Viernes,Sábado',
             'hora_inicio' => 'required',

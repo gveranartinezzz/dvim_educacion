@@ -9,7 +9,7 @@
 @include('layouts.tab', ['id' => 'enviar', 'icono' => 'bi-clipboard2-plus', 'texto' => 'Registrar Informe', 'activo' => true])
 @include('layouts.tab', ['id' => 'historial', 'icono' => 'bi-clock-history', 'texto' => 'Historial'])
 @include('layouts.tab', ['id' => 'diagnosticos', 'icono' => 'bi-lightning-charge', 'texto' => 'Diagnósticos Rápidos'])
-@include('layouts.tab', ['id' => 'guias', 'icono' => 'bi-book', 'texto' => 'Guías'])
+@include('layouts.tab', ['id' => 'guias', 'icono' => 'bi-journal-bookmark-fill', 'texto' => 'Guías e Indicadores'])
 @endsection
 
 @section('content')
@@ -31,9 +31,7 @@
         <!-- REGISTRAR INFORME -->
         <!-- ============================= -->
 
-        <div class="tab-pane fade show active" id="panel-enviar">
-
-            <div class="tab-pane fade" id="panel-diagnosticos" role="tabpanel">
+        <div class="tab-pane fade show active" id="panel-enviar" role="tabpanel">
 <div class="container-fluid mt-4">
 
                 <div class="row justify-content-center">
@@ -330,7 +328,6 @@
                 </div>
 
             </div>
-</div>
 
         </div>
 
@@ -396,7 +393,8 @@
         <!-- DIAGNÓSTICOS RÁPIDOS -->
         <!-- ============================= -->
 
-        <div class="container-fluid mt-4">
+        <div class="tab-pane fade" id="panel-diagnosticos" role="tabpanel">
+<div class="container-fluid mt-4">
 
             <div class="row justify-content-center">
 
@@ -446,6 +444,7 @@
             </div>
 
         </div>
+</div>
 
         <!-- ============================= -->
         <!-- GUÍAS -->
@@ -485,7 +484,7 @@
                                         data-bs-toggle="collapse"
                                         data-bs-target="#guiaUno">
 
-                                    <i class="bi bi-brightness-high-fill me-2 text-warning"></i>
+                                    <i class="bi bi-brightness-high-fill me-2" style="color:#b45309;"></i>
 
                                     Adecuaciones de Acceso
                                     (Infraestructura y Materiales)

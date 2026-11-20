@@ -17,10 +17,7 @@
                     
                     <span class="section-label">Datos de Identificación</span>
                     
-                    <div class="input-group mb-3">
-                        <span class="input-group-text">Paciente:</span>
-                        <input type="text" name="paciente" class="form-control" value="{{ $inf->paciente }}" required>
-                    </div>
+                    @include('layouts.paciente_select', ['valor' => $inf->paciente, 'clase' => 'mb-3'])
 
                     <div class="row mb-3">
                         <div class="col-md-6">

@@ -10,6 +10,7 @@
 @include('layouts.tab', ['id' => 'consultar', 'icono' => 'bi-list-ul', 'texto' => 'Consultar Historial'])
 @include('layouts.tab', ['id' => 'filtros', 'icono' => 'bi-funnel-fill', 'texto' => 'Búsqueda y Filtros'])
 @include('layouts.tab', ['id' => 'estatus', 'icono' => 'bi-toggle-on', 'texto' => 'Altas / Bajas (Estatus)'])
+@include('layouts.tab', ['id' => 'guias', 'icono' => 'bi-journal-bookmark-fill', 'texto' => 'Guías e Indicadores'])
 @endsection
 
 @section('content')
@@ -534,6 +535,39 @@
             </div>
         </div>
 
+
+        </div>
+        <div class="tab-pane fade" id="panel-guias" role="tabpanel">
+@php
+$gTitulo = 'Guías e indicadores de Pacientes';
+$gIntro  = 'Referencias para registrar y mantener al día los expedientes del centro.';
+$gInd = [
+    ['Pacientes registrados', $pacientes->count(), 'bi-people-fill'],
+    ['Activos', $pacientes->where('estatus', 'Activo')->count(), 'bi-person-check-fill'],
+    ['Inactivos (baja)', $pacientes->where('estatus', 'Inactivo')->count(), 'bi-person-dash-fill'],
+    ['Con diagnóstico capturado', $pacientes->filter(fn ($p) => filled($p->diagnostico))->count(), 'bi-clipboard2-pulse-fill'],
+];
+$gGuias = [
+    ['Registro del expediente', 'bi-file-earmark-person', [
+        'Captura el <strong>nombre completo</strong> del paciente.',
+        'Indica la fecha de nacimiento y la edad.',
+        'Dirección: calle y número, colonia, municipio, C.P. de 5 dígitos y referencias.',
+        'Anota los datos de la madre y del padre o tutor.',
+    ]],
+    ['Diagnóstico y motivo', 'bi-clipboard2-pulse', [
+        'Escribe el diagnóstico como viene en la valoración (ej. Autismo, TDAH).',
+        'Indica si el paciente está escolarizado (Sí / No).',
+        'El motivo de consulta debe ser breve y claro.',
+    ]],
+    ['Altas y bajas', 'bi-toggle-on', [
+        '<strong>Activo:</strong> el paciente continúa en atención.',
+        '<strong>Inactivo:</strong> baja del paciente; su expediente se conserva.',
+        'El cambio se hace en la pestaña de estatus, sin borrar el registro.',
+        'Editar o eliminar un expediente es solo para administradores.',
+    ]],
+];
+@endphp
+@include('layouts.guias', ['titulo' => $gTitulo, 'intro' => $gIntro, 'indicadores' => $gInd, 'guias' => $gGuias])
         </div>
       </div>
     </div>

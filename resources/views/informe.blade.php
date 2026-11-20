@@ -52,16 +52,7 @@
                                 Datos de Identificación
                             </span>
 
-                            <div class="input-group mb-3">
-                                <span class="input-group-text">
-                                    Paciente:
-                                </span>
-
-                                <input type="text"
-                                       name="paciente"
-                                       class="form-control"
-                                       required>
-                            </div>
+                            @include('layouts.paciente_select')
 
                             <div class="row mb-3">
 

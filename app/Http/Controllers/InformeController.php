@@ -30,7 +30,7 @@ class InformeController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate(['paciente' => 'required|string|max:150']);
+        $request->validate(['paciente' => $this->reglaPaciente()]);
         Informe::query()->create($request->only($this->campos));
         return redirect('/informe')->with('ok', 'Informe guardado.');
     }
@@ -56,7 +56,7 @@ class InformeController extends Controller
 
     public function update(Request $request, $id)
     {
-        $request->validate(['paciente' => 'required|string|max:150']);
+        $request->validate(['paciente' => $this->reglaPaciente(Informe::query()->where('id', $id)->value('paciente'))]);
         Informe::query()->where('id', $id)->update($request->only($this->campos));
         return redirect('/informe')->with('ok', 'Informe actualizado.');
     }

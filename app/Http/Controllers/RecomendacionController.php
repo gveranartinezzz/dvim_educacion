@@ -13,12 +13,15 @@ class RecomendacionController extends Controller
 
     private array $campos = ['paciente', 'madre', 'padre', 'escuela_procedencia', 'grado', 'recomendacion', 'notas'];
 
-    private array $reglas = [
-        'paciente'      => 'required|string|max:150',
-        'madre'         => 'required|string|max:150',
-        'padre'         => 'required|string|max:150',
-        'recomendacion' => 'required|string',
-    ];
+    private function reglas(?string $paciente = null): array
+    {
+        return [
+            'paciente'      => $this->reglaPaciente($paciente),
+            'madre'         => 'required|string|max:150',
+            'padre'         => 'required|string|max:150',
+            'recomendacion' => 'required|string',
+        ];
+    }
 
     public function index()
     {
@@ -28,7 +31,7 @@ class RecomendacionController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate($this->reglas);
+        $request->validate($this->reglas());
         Recomendacion::query()->create($request->only($this->campos));
         return redirect('/recomendaciones')->with('ok', 'Recomendación guardada.');
     }
@@ -42,7 +45,7 @@ class RecomendacionController extends Controller
 
     public function update(Request $request, $id)
     {
-        $request->validate($this->reglas);
+        $request->validate($this->reglas(Recomendacion::query()->where('id', $id)->value('paciente')));
         Recomendacion::query()->where('id', $id)->update($request->only($this->campos));
         return redirect('/recomendaciones')->with('ok', 'Recomendación actualizada.');
     }
