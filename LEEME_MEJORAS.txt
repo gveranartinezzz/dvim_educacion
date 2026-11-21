@@ -1,0 +1,7 @@
+1) Descomprime este zip ENCIMA de tu proyecto (carpeta dvim_educacion).
+2) En la terminal de Laragon, dentro del proyecto:
+     php instalar_mejoras.php
+     php artisan migrate
+     php artisan divm:encriptar-contrasenas
+     php artisan optimize:clear
+3) Entra con tu usuario de siempre (la contraseña no cambia). Nuevo en el menú: Panel, Expediente y Bitácora (solo administrador).

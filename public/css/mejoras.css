@@ -1,0 +1,44 @@
+/* Mejoras de diseño y celular (se carga después de divm.css) */
+
+/* Barras del panel */
+.barra-fila { margin-bottom: 12px; }
+.barra-texto { display: flex; justify-content: space-between; gap: 8px; font-size: 14px; margin-bottom: 4px; color: #2b1d27; }
+.barra { height: 10px; background: #eadfe5; border-radius: 99px; overflow: hidden; }
+.barra > span { display: block; height: 100%; background: #580c33; border-radius: 99px; }
+
+.btn-divm-outline { background: #fff; color: #580c33; font-weight: bold; border: 2px solid #580c33; }
+.btn-divm-outline:hover { background: #580c33; color: #fff; }
+
+.expediente-item { border: 1px solid #e3d6de; border-radius: 8px; padding: 8px 12px; margin-bottom: 8px; background: #fff; color: #2b1d27; }
+.expediente-item summary { cursor: pointer; font-weight: 600; }
+
+/* Accesibilidad: foco visible con teclado */
+a:focus-visible, button:focus-visible, .form-control:focus-visible, .form-select:focus-visible {
+    outline: 3px solid #f2b8d4; outline-offset: 2px;
+}
+
+/* Celular */
+@media (max-width: 768px) {
+    /* 16px evita que el iPhone haga zoom al tocar un campo */
+    .form-control, .form-select, .input-group-text { font-size: 16px; }
+    .btn { min-height: 44px; }
+    .input-group { flex-wrap: wrap; }
+    .input-group > .input-group-text { width: 100%; border-radius: 6px 6px 0 0; }
+    .input-group > .form-control, .input-group > .form-select { width: 100%; flex: 1 1 100%; border-radius: 0 0 6px 6px !important; }
+    .card-table, .card-divm { padding-left: 14px; padding-right: 14px; }
+    .calendar-grid { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .toast, .toast-container .toast { min-width: 0 !important; max-width: calc(100vw - 24px); }
+    .table-responsive { -webkit-overflow-scrolling: touch; }
+    .titulo-principal { font-size: 1.15rem; }
+    #chat-widget, .chat-widget, .chat-panel { max-width: calc(100vw - 16px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+}
+
+@media print {
+    #sidebar, nav.navbar, .btn, .chat-widget, #chat-widget { display: none !important; }
+    .expediente-item { break-inside: avoid; }
+    details.expediente-item > * { display: block; }
+}

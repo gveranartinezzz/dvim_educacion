@@ -62,7 +62,7 @@
 
                             <div class="mb-3">
                                 <label class="form-label">Correo electrónico</label>
-                                <input type="email" name="correo" value="{{ old('correo') }}" class="form-control" maxlength="150" autocomplete="email" required>
+                                <input type="email" name="correo" value="{{ old('correo') }}" class="form-control" maxlength="100" autocomplete="email" required>
                             </div>
 
                             <div class="mb-3">

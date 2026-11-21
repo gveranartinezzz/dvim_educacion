@@ -68,7 +68,7 @@
 
                     <div class="input-group mb-3">
                         <span class="input-group-text">Contraseña:</span>
-                        <input type="password" id="txtPassword" name="contrasena" class="form-control" placeholder="Mínimo 6 caracteres" minlength="6" required>
+                        <input type="password" id="txtPassword" name="contrasena" class="form-control" placeholder="Mínimo 8 caracteres" minlength="8" required>
                     </div>
 
                     <div class="row g-3 mb-4">
