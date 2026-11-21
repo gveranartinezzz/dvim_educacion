@@ -33,7 +33,7 @@ class UsuarioController extends Controller
             'apaterno'   => 'required|string|max:100',
             'amaterno'   => 'required|string|max:100',
             'correo'     => 'required|email|unique:usuarios,correo',
-            'contrasena' => 'required|min:6',
+            'contrasena' => 'required|min:8|max:72',
             'rol'        => 'required|in:Personal,Administrador',
             'estado'     => 'required|in:Activo,Inactivo',
         ]);
@@ -64,7 +64,7 @@ class UsuarioController extends Controller
             'correo'           => 'required|email|unique:usuarios,correo,' . $id . ',id_usuario',
             'rol'              => 'required|in:Personal,Administrador',
             'estado'           => 'required|in:Activo,Inactivo',
-            'nueva_contrasena' => 'nullable|min:6',
+            'nueva_contrasena' => 'nullable|min:8|max:72',
         ]);
 
         $data['dos_factores_activado'] = $request->boolean('dos_factores_activado') ? 1 : 0;

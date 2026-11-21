@@ -1,0 +1,23 @@
+Pega esto en Railway → tu servicio (la app) → Variables → Raw Editor.
+Cambia solo lo que dice PON-AQUI. Si tu base MySQL en Railway no se llama "MySQL", cambia ese nombre dentro de ${{ }}.
+
+APP_NAME=DIVM Educación Especial
+APP_ENV=production
+APP_DEBUG=false
+APP_KEY=PON-AQUI-el-APP_KEY-de-tu-.env
+APP_URL=https://PON-AQUI-TU-DOMINIO.up.railway.app
+APP_TIMEZONE=America/Mexico_City
+APP_LOCALE=es
+DB_CONNECTION=mysql
+DB_HOST=${{MySQL.MYSQLHOST}}
+DB_PORT=${{MySQL.MYSQLPORT}}
+DB_DATABASE=${{MySQL.MYSQLDATABASE}}
+DB_USERNAME=${{MySQL.MYSQLUSER}}
+DB_PASSWORD=${{MySQL.MYSQLPASSWORD}}
+SESSION_DRIVER=file
+CACHE_STORE=file
+LOG_CHANNEL=stderr
+DOS_PASOS=false
+GROQ_API_KEY=PON-AQUI-tu-clave-nueva-de-Groq
+GROQ_MODEL=openai/gpt-oss-20b
+GROQ_RESPALDO=openai/gpt-oss-120b

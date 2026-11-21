@@ -43,7 +43,7 @@ class RegistroUsuarioController extends Controller
             'nombre'     => 'required|string|max:100',
             'apaterno'   => 'required|string|max:100',
             'amaterno'   => 'required|string|max:100',
-            'correo'     => 'required|email|max:150|unique:usuarios,correo',
+            'correo'     => 'required|email|max:100|unique:usuarios,correo',
             'contrasena' => 'required|string|min:8|max:72|confirmed',
         ], [
             'required'            => 'Falta llenar: :attribute.',

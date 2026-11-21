@@ -19,6 +19,9 @@ class PacienteController extends Controller
 
     public function store(Request $request)
     {
+        if (is_string($request->input('nombre'))) {
+            $request->merge(['nombre' => preg_replace('/\s+/', ' ', trim($request->input('nombre')))]);
+        }
         $data = $request->validate([
             'nombre'           => 'required|string|max:150',
             'fecha_nacimiento' => 'nullable|date',

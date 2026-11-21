@@ -1,0 +1,12 @@
+ORDEN (en la terminal de Laragon, dentro de C:\laragon\www\dvim_educacion):
+
+1) Descomprime este zip ENCIMA del proyecto.
+2) php instalar_mejoras.php          (seguridad, panel, expediente, bitácora, celular)
+3) php instalar_correo_brevo.php     (correo por API; opcional, para cuando tengas dominio propio)
+4) php instalar_railway.php          (prepara el proyecto para Railway)
+5) php artisan migrate               (crea la bitácora; opcional)
+6) php artisan optimize:clear
+7) git add .
+   git commit -m "Mejoras DIVM"
+   git push
+8) En Railway: pon las variables de VARIABLES_RAILWAY.txt, importa divm.sql a la base MySQL y abre tu dominio.
