@@ -51,14 +51,16 @@ class AuthController extends Controller
             return back()->with('error', 'Tu usuario está inactivo. Habla con un administrador.')->withInput();
         }
 
-        // Verificación en dos pasos: se manda un código al correo y se espera a que lo escriba
-        if (config('divm.dos_pasos') && $usuario->dos_factores_activado) {
+        // Verificación en dos pasos OBLIGATORIA para todos: después de validar el
+        // correo y la contraseña se envía un código al correo y se espera a que lo escriba.
+        // Se apaga para todos solo con DOS_PASOS=false en las variables de entorno.
+        if (config('divm.dos_pasos')) {
             $request->session()->regenerate();
             session(['dos_pasos' => ['id' => $usuario->id_usuario, 'intentos' => 0, 'enviado' => time()]]);
 
             if (!DosPasos::enviar($usuario)) {
                 session()->forget('dos_pasos');
-                return back()->with('error', 'No se pudo enviar el código a tu correo. Revisa la configuración MAIL del .env.')->withInput();
+                return back()->with('error', 'No se pudo enviar el código a tu correo. Intenta de nuevo o avisa a un administrador.')->withInput();
             }
 
             return redirect()->route('verificar');
