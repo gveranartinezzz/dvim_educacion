@@ -33,19 +33,9 @@ Route::get('/recuperar/codigo', [RecuperacionController::class, 'formCodigo'])->
 Route::post('/recuperar/codigo', [RecuperacionController::class, 'restablecer'])->middleware('throttle:10,1')->name('recuperar.restablecer');
 Route::post('/recuperar/reenviar', [RecuperacionController::class, 'reenviar'])->middleware('throttle:3,1')->name('recuperar.reenviar');
 
-$soloSesion = function ($request, $next) {
-    if (!session()->has('id_usuario')) {
-        return redirect()->route('login');
-    }
-    return $next($request);
-};
+$soloSesion = \App\Http\Middleware\SoloSesion::class;
 
-$soloAdmin = function ($request, $next) {
-    if (session('rol') !== 'Administrador') {
-        abort(403, 'Solo administradores.');
-    }
-    return $next($request);
-};
+$soloAdmin = \App\Http\Middleware\SoloAdmin::class;
 
 Route::group(["middleware" => [$soloSesion]], function () use ($soloAdmin) {
 
