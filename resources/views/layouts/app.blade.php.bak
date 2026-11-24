@@ -17,6 +17,7 @@
     @stack('head')
     <!-- Hoja de estilo única del sistema -->
     <link rel="stylesheet" href="{{ asset('css/divm.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/mejoras.css') }}">
 
 </head>
 

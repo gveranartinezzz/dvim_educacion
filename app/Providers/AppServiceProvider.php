@@ -24,6 +24,7 @@ class AppServiceProvider extends ServiceProvider
         // Mejoras: cabeceras de seguridad, bitácora y rutas nuevas
         $this->app['router']->pushMiddlewareToGroup('web', \App\Http\Middleware\CabecerasSeguridad::class);
         $this->app['router']->pushMiddlewareToGroup('web', \App\Http\Middleware\RegistrarBitacora::class);
+        $this->app['router']->pushMiddlewareToGroup('web', \App\Http\Middleware\ValidarFormularios::class);
         if (! $this->app->routesAreCached()) {
             \Illuminate\Support\Facades\Route::middleware('web')->group(base_path('routes/mejoras.php'));
         }

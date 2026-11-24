@@ -142,6 +142,8 @@
         });
     </script>
 
+    <script src="{{ asset('js/formularios.js') }}?v=1"></script>
+
     @stack('scripts')
     @yield('scripts')
 

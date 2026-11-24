@@ -140,11 +140,7 @@
                 </span>
 
                 <!-- CERRAR SESIÓN -->
-<a class="btn text-white fw-bold" 
-   style="background-color: #dc3545; border-color: #dc3545; transition: background-color 0.2s;" 
-   href="{{ url('/logout') }}">
-    Cerrar Sesión
-</a>
+<form method="POST" action="{{ url('/logout') }}" class="d-inline">@csrf<button type="submit" class="btn text-white fw-bold" style="background-color: #dc3545; border-color: #dc3545; transition: background-color 0.2s;">Cerrar Sesión</button></form>
 
             </div>
 
