@@ -38,11 +38,11 @@ class InformeController extends Controller
     /** Datos para la gráfica de diagnósticos (JSON). */
     public function grafica()
     {
-        $datos = Informe::query()
-            ->selectRaw("IFNULL(NULLIF(hc_diagnostico, ''), 'Sin diagnóstico') AS diagnostico, COUNT(*) AS total")
-            ->groupBy('hc_diagnostico')
-            ->orderByDesc('total')
-            ->get();
+        // El diagnóstico está cifrado, así que se cuenta aquí y no con SQL
+        $datos = Informe::query()->get(['id', 'hc_diagnostico'])
+            ->groupBy(fn ($i) => trim((string) $i->hc_diagnostico) !== '' ? trim((string) $i->hc_diagnostico) : 'Sin diagnóstico')
+            ->map(fn ($g, $dx) => ['diagnostico' => $dx, 'total' => $g->count()])
+            ->sortByDesc('total')->values();
 
         return response()->json($datos);
     }
@@ -57,7 +57,7 @@ class InformeController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate(['paciente' => $this->reglaPaciente(Informe::query()->where('id', $id)->value('paciente'))]);
-        Informe::query()->where('id', $id)->update($request->only($this->campos));
+        Informe::query()->findOrFail($id)->update($request->only($this->campos)); // con el modelo, para que el diagnóstico se cifre
         return redirect('/informe')->with('ok', 'Informe actualizado.');
     }
 

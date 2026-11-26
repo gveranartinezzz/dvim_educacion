@@ -26,6 +26,14 @@
     $ultimo = $lunes->copy()->addDays(count($dias) - 1);
     $fmtLargo = fn ($f) => $f->day . ' de ' . $meses[$f->month - 1];
     $esSemanaActual = $lunes->isSameDay(now()->startOfWeek(\Carbon\Carbon::MONDAY));
+    // ¿El horario $h cae en la fecha $f? (los de una sola fecha solo ese día; los que se repiten, cada semana desde su fecha)
+    $aplica = function ($h, $f) use ($dias) {
+        if (($dias[$f->dayOfWeekIso - 1] ?? null) !== $h->dia_semana) return false;
+        $fh  = $h->fecha ? substr((string) $h->fecha, 0, 10) : null;
+        $dia = $f->toDateString();
+        if ($fh && empty($h->repite)) return $fh === $dia;
+        return !$fh || $fh <= $dia;
+    };
     $proxima = function ($nomDia) use ($dias) {       // próxima fecha en que cae ese día (desde hoy)
         $n = array_search($nomDia, $dias) + 1;        // lunes = 1
         $f = now()->startOfDay();
@@ -35,6 +43,7 @@
     $jsH  = $horarios->map(fn($h) => [
                 'id' => $h->id_horario, 'id_usuario' => $h->id_usuario, 'terapeuta' => $h->terapeuta,
                 'dia_semana' => $h->dia_semana, 'paciente' => $h->paciente,
+                'fecha' => $h->fecha ? substr((string) $h->fecha, 0, 10) : null, 'repite' => (bool) ($h->repite ?? false),
                 'hora_inicio' => substr($h->hora_inicio, 0, 5), 'hora_fin' => substr($h->hora_fin, 0, 5),
             ])->values();
 @endphp
@@ -77,15 +86,28 @@
     </select>
 </div>
 
-<span class="section-label"><i class="bi bi-calendar-day me-2"></i>2. Día de la semana</span>
-<input type="hidden" name="dia_semana" id="selectDia" value="{{ old('dia_semana') }}" required>
-<div class="agenda-dias mb-4" id="chipsDia">
-@foreach($dias as $d)
-    <button type="button" class="agenda-dia {{ old('dia_semana') === $d ? 'activo' : '' }}" data-dia="{{ $d }}">
-        <span class="n">{{ mb_substr($d, 0, 3) }}</span>
-        <span class="f">{{ $proxima($d)->format('d/m') }}</span>
-    </button>
-@endforeach
+<span class="section-label"><i class="bi bi-calendar-day me-2"></i>2. Fecha</span>
+<input type="hidden" name="dia_semana" id="selectDia" value="{{ old('dia_semana') }}">
+<div class="mb-2">
+    <input type="date" name="fecha" id="fechaHorario" class="form-control" min="{{ now()->toDateString() }}" max="2099-12-31" value="{{ old('fecha', now()->dayOfWeekIso === 7 ? now()->addDay()->toDateString() : now()->toDateString()) }}" required>
+    <div class="fw-bold text-divm mt-1" id="textoFecha"></div>
+</div>
+<div class="agenda-dias mb-2" id="chipsDia">
+@php $sig = now(); $n = 0; @endphp
+@while($n < 6)
+    @if($sig->dayOfWeekIso !== 7)
+        <button type="button" class="agenda-dia" data-fecha="{{ $sig->toDateString() }}">
+            <span class="n">{{ mb_substr($dias[$sig->dayOfWeekIso - 1], 0, 3) }}</span>
+            <span class="f">{{ $sig->format('d/m') }}</span>
+        </button>
+        @php $n++; @endphp
+    @endif
+    @php $sig = $sig->copy()->addDay(); @endphp
+@endwhile
+</div>
+<div class="form-check mb-4">
+    <input class="form-check-input" type="checkbox" name="repite" value="1" id="repiteSemana" {{ old('repite') ? 'checked' : '' }}>
+    <label class="form-check-label small" for="repiteSemana">Repetir cada semana (mismo día y hora, desde esta fecha)</label>
 </div>
 
 <span class="section-label"><i class="bi bi-clock me-2"></i>3. Horas</span>
@@ -170,16 +192,21 @@
 <div class="table-responsive">
 <table class="table table-hover align-middle mb-0">
     <thead style="background:var(--primary); color:#fff;">
-        <tr><th>Paciente</th><th>Terapeuta</th><th>Día</th><th>Próxima fecha</th><th>Horas</th><th class="text-center">Acciones</th></tr>
+        <tr><th>Paciente</th><th>Terapeuta</th><th>Fecha</th><th>Horas</th><th class="text-center">Acciones</th></tr>
     </thead>
     <tbody id="tablaHorarios">
     @foreach($horarios as $h)
         <tr data-paciente="{{ $h->paciente }}" data-terapeuta="{{ $h->terapeuta }}" data-dia="{{ $h->dia_semana }}"
+            data-fecha="{{ $h->fecha ? substr((string) $h->fecha, 0, 10) : '' }}" data-repite="{{ !empty($h->repite) || !$h->fecha ? 1 : 0 }}"
             data-id="{{ $h->id_horario }}" data-usuario="{{ $h->id_usuario }}" data-inicio="{{ substr($h->hora_inicio, 0, 5) }}" data-fin="{{ substr($h->hora_fin, 0, 5) }}">
             <td class="fw-bold">{{ $h->paciente }}</td>
             <td><i class="bi bi-person-circle me-1 text-secondary"></i> {{ $h->terapeuta }}</td>
-            <td><span class="badge badge-{{ $slug($h->dia_semana) }} text-white">{{ $h->dia_semana }}</span></td>
-            <td>{{ $proxima($h->dia_semana)->format('d/m/Y') }}</td>
+            <td>
+                <span class="badge badge-{{ $slug($h->dia_semana) }} text-white">{{ $h->dia_semana }}</span>
+                @if($h->fecha) {{ \Carbon\Carbon::parse($h->fecha)->format('d/m/Y') }} @endif
+                @if(!$h->fecha)<small class="text-muted d-block">Todas las semanas (horario anterior)</small>
+                @elseif(!empty($h->repite))<small class="text-muted d-block"><i class="bi bi-arrow-repeat"></i> Se repite cada semana</small>@endif
+            </td>
             <td><i class="bi bi-clock me-1 text-muted"></i> {{ substr($h->hora_inicio, 0, 5) }} – {{ substr($h->hora_fin, 0, 5) }} h</td>
             <td class="text-center text-nowrap">
                 <button class="btn btn-sm btn-outline-primary" type="button" onclick="editarHorario(this.closest('tr'))" title="Editar horario"><i class="bi bi-pencil"></i></button>
@@ -250,7 +277,7 @@
         <div class="cal-time">{{ sprintf('%02d:00', $hr) }}</div>
         @foreach($dias as $d)
             <div class="cal-cell">
-            @foreach($horarios->where('dia_semana', $d) as $h)
+            @foreach($horarios->filter(fn ($h) => $aplica($h, $fechaDia[$d])) as $h)
                 @if((int) substr($h->hora_inicio, 0, 2) === $hr)
                     <div class="cal-event tc-{{ ($idx[$h->id_usuario] ?? 0) % 8 }}" data-terapeuta-id="{{ $h->id_usuario }}" title="{{ $h->paciente }} | {{ $h->terapeuta }} | {{ substr($h->hora_inicio,0,5) }}-{{ substr($h->hora_fin,0,5) }}">
                         <div>{{ $h->paciente }}</div>
@@ -269,15 +296,22 @@
 <table class="table table-hover align-middle">
     <thead style="background:var(--primary);color:#fff;"><tr><th>Día</th><th>Fecha</th><th>Paciente</th><th>Terapeuta</th><th>Horas</th></tr></thead>
     <tbody>
-    @foreach($horarios->sortBy(fn($h) => array_search($h->dia_semana, $dias)) as $h)
+    @php
+        $ocurr = [];
+        foreach ($dias as $nd) { foreach ($horarios as $h) { if ($aplica($h, $fechaDia[$nd])) { $ocurr[] = [$fechaDia[$nd], $h]; } } }
+        usort($ocurr, fn ($x, $y) => [$x[0]->toDateString(), $x[1]->hora_inicio] <=> [$y[0]->toDateString(), $y[1]->hora_inicio]);
+    @endphp
+    @forelse($ocurr as [$fd, $h])
         <tr>
             <td><span class="badge badge-{{ $slug($h->dia_semana) }} text-white">{{ $h->dia_semana }}</span></td>
-            <td>{{ $fechaDia[$h->dia_semana]->format('d/m/Y') }}</td>
+            <td>{{ $fd->format('d/m/Y') }}</td>
             <td>{{ $h->paciente }}</td>
             <td>{{ $h->terapeuta }}</td>
             <td>{{ substr($h->hora_inicio, 0, 5) }} – {{ substr($h->hora_fin, 0, 5) }} h</td>
         </tr>
-    @endforeach
+    @empty
+        <tr><td colspan="5" class="text-center text-muted">No hay horarios en esta semana.</td></tr>
+    @endforelse
     </tbody>
 </table>
 </div>
@@ -341,10 +375,12 @@ $gGuias = [
             </select>
         </div>
         <div class="mb-3">
-            <label class="form-label fw-bold text-secondary small">Día de la semana</label>
-            <select name="dia_semana" id="edDia" class="form-select" required>
-                @foreach($dias as $d)<option>{{ $d }}</option>@endforeach
-            </select>
+            <label class="form-label fw-bold text-secondary small">Fecha</label>
+            <input type="date" name="fecha" id="edFecha" class="form-control" max="2099-12-31" required>
+            <div class="form-check mt-2">
+                <input class="form-check-input" type="checkbox" name="repite" value="1" id="edRepite">
+                <label class="form-check-label small" for="edRepite">Repetir cada semana</label>
+            </div>
         </div>
         <div class="row">
             <div class="col-6"><label class="form-label fw-bold text-secondary small">Hora de inicio</label>
@@ -391,37 +427,60 @@ if (/[?&]semana=/.test(location.search)) { window.addEventListener('load', funct
 <script>
 const horariosExistentes = @json($jsH);
 
+const NOMBRES_DIA = ['', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const aFecha = iso => { const [y, m, d] = iso.split('-').map(Number); return new Date(y, m - 1, d); };
+const diaDe = iso => NOMBRES_DIA[aFecha(iso).getDay() || 7];
+const fmt = iso => iso.split('-').reverse().join('/');
+
+/** ¿el horario existente h cae en la fecha iso? */
+function aplicaEn(h, iso) {
+    if (h.dia_semana !== diaDe(iso)) return false;
+    if (h.fecha && !h.repite) return h.fecha === iso;
+    return !h.fecha || h.fecha <= iso;
+}
+/** ¿se empalma el horario existente con uno nuevo (fecha iso, repite o no)? */
+function chocaCon(h, iso, repite) {
+    if (h.dia_semana !== diaDe(iso)) return false;
+    if (repite) return !h.fecha || h.repite || h.fecha >= iso;
+    return aplicaEn(h, iso);
+}
+
 function verificarConflicto() {
     const idTerapeuta = document.getElementById('selectTerapeuta').value;
-    const dia    = document.getElementById('selectDia').value;
+    const fecha  = document.getElementById('fechaHorario').value;
+    const repite = document.getElementById('repiteSemana').checked;
     const inicio = document.getElementById('horaInicio').value;
     const fin    = document.getElementById('horaFin').value;
-    if (!idTerapeuta || !dia || !inicio || !fin) return;
+    const alerta = document.getElementById('alertaConflicto');
+    const texto  = document.getElementById('textoConflicto');
+    alerta.style.display = 'none';
+    if (!fecha) return;
+
+    if (diaDe(fecha) === 'Domingo') {
+        texto.textContent = 'El centro no atiende los domingos; elige una fecha de lunes a sábado.';
+        alerta.style.display = 'block';
+        return;
+    }
+    if (!idTerapeuta || !inicio || !fin) return;
 
     const toMin = t => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
     const nI = toMin(inicio), nF = toMin(fin);
-    const alerta = document.getElementById('alertaConflicto');
-    const texto  = document.getElementById('textoConflicto');
-
     if (nF <= nI) {
         texto.textContent = "La hora de fin debe ser posterior a la hora de inicio.";
         alerta.style.display = 'block';
         return;
     }
-
     const conflicto = horariosExistentes.find(h =>
-        String(h.id_usuario) === String(idTerapeuta) && h.dia_semana === dia &&
+        String(h.id_usuario) === String(idTerapeuta) && chocaCon(h, fecha, repite) &&
         nI < toMin(h.hora_fin) && nF > toMin(h.hora_inicio));
-
     if (conflicto) {
-        texto.textContent = `${conflicto.terapeuta} ya tiene un horario el ${conflicto.dia_semana} de ${conflicto.hora_inicio} a ${conflicto.hora_fin}.`;
+        texto.textContent = `${conflicto.terapeuta} ya tiene un horario el ${conflicto.dia_semana}${conflicto.fecha ? ' ' + fmt(conflicto.fecha) : ''} de ${conflicto.hora_inicio} a ${conflicto.hora_fin}.`;
         alerta.style.display = 'block';
-    } else {
-        alerta.style.display = 'none';
     }
 }
 
-['selectTerapeuta', 'selectDia', 'horaInicio', 'horaFin'].forEach(id =>
+['selectTerapeuta', 'fechaHorario', 'repiteSemana', 'horaInicio', 'horaFin'].forEach(id =>
     document.getElementById(id)?.addEventListener('change', verificarConflicto));
 
 /* ---------- Agenda del día (vista previa al asignar) ---------- */
@@ -431,15 +490,16 @@ const aHora = m => String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m 
 
 function pintarAgenda() {
     const idT  = document.getElementById('selectTerapeuta').value;
-    const dia  = document.getElementById('selectDia').value;
+    const fecha = document.getElementById('fechaHorario').value;
+    const dia  = fecha ? diaDe(fecha) : '';
     const ini  = document.getElementById('horaInicio').value;
     const fin  = document.getElementById('horaFin').value;
     const caja = document.getElementById('agendaBloques');
     const nomT = document.getElementById('selectTerapeuta').selectedOptions[0];
     document.getElementById('agendaTitulo').textContent =
-        (dia ? 'Agenda del ' + dia : 'Elige un día para ver la agenda') + (idT && nomT ? ' · ' + nomT.textContent.trim() : ' · todos los terapeutas');
+        (fecha ? 'Agenda del ' + dia + ' ' + fmt(fecha) : 'Elige una fecha para ver la agenda') + (idT && nomT ? ' · ' + nomT.textContent.trim() : ' · todos los terapeutas');
     caja.innerHTML = '';
-    if (!dia) return;
+    if (!fecha || dia === 'Domingo') return;
 
     const dibujar = (i, f, clase, titulo, detalle) => {
         const el = document.createElement('div');
@@ -456,7 +516,7 @@ function pintarAgenda() {
     const nI = ini ? aMin(ini) : null, nF = fin ? aMin(fin) : null;
     const valido = nI !== null && nF !== null && nF > nI;
 
-    horariosExistentes.filter(h => h.dia_semana === dia && (!idT || String(h.id_usuario) === String(idT)))
+    horariosExistentes.filter(h => aplicaEn(h, fecha) && (!idT || String(h.id_usuario) === String(idT)))
         .forEach(h => {
             const i = aMin(h.hora_inicio), f = aMin(h.hora_fin);
             const choca = valido && nI < f && nF > i;
@@ -469,13 +529,22 @@ function pintarAgenda() {
     }
 }
 
+function actualizarFecha() {
+    const inp = document.getElementById('fechaHorario');
+    const t = document.getElementById('textoFecha');
+    document.querySelectorAll('#chipsDia .agenda-dia').forEach(x => x.classList.toggle('activo', x.dataset.fecha === inp.value));
+    if (!inp.value) { t.textContent = ''; document.getElementById('selectDia').value = ''; return; }
+    const d = aFecha(inp.value), nom = diaDe(inp.value);
+    document.getElementById('selectDia').value = nom === 'Domingo' ? '' : nom;
+    t.textContent = nom + ' ' + String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + d.getFullYear();
+}
 document.querySelectorAll('#chipsDia .agenda-dia').forEach(b => b.addEventListener('click', () => {
-    document.querySelectorAll('#chipsDia .agenda-dia').forEach(x => x.classList.remove('activo'));
-    b.classList.add('activo');
-    const inp = document.getElementById('selectDia');
-    inp.value = b.dataset.dia;
+    const inp = document.getElementById('fechaHorario');
+    inp.value = b.dataset.fecha;
     inp.dispatchEvent(new Event('change'));
 }));
+document.getElementById('fechaHorario')?.addEventListener('change', actualizarFecha);
+document.getElementById('fechaHorario')?.addEventListener('input', actualizarFecha);
 
 document.querySelectorAll('[data-duracion]').forEach(b => b.addEventListener('click', () => {
     const ini = document.getElementById('horaInicio');
@@ -486,11 +555,12 @@ document.querySelectorAll('[data-duracion]').forEach(b => b.addEventListener('cl
     fin.dispatchEvent(new Event('change'));
 }));
 
-['selectTerapeuta', 'selectDia', 'horaInicio', 'horaFin'].forEach(id => {
+['selectTerapeuta', 'fechaHorario', 'repiteSemana', 'horaInicio', 'horaFin'].forEach(id => {
     const el = document.getElementById(id);
     el?.addEventListener('change', pintarAgenda);
     el?.addEventListener('input', pintarAgenda);
 });
+actualizarFecha();
 pintarAgenda();
 
 function filtrarHorarios() {
@@ -520,7 +590,9 @@ function editarHorario(fila) {
         if (![...el.options].some(o => o.value === v)) el.add(new Option(v, v)); // paciente dado de baja
         el.value = v;
     };
-    sel('edPaciente', d.paciente); sel('edTerapeuta', d.usuario); sel('edDia', d.dia);
+    sel('edPaciente', d.paciente); sel('edTerapeuta', d.usuario);
+    document.getElementById('edFecha').value = d.fecha || '';
+    document.getElementById('edRepite').checked = d.repite === '1';
     document.getElementById('edInicio').value = d.inicio;
     document.getElementById('edFin').value = d.fin;
     document.getElementById('formEditar').action = "{{ url('/distribucion') }}/" + d.id;

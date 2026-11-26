@@ -11,6 +11,8 @@ class Paciente extends Model
     public $timestamps = false;
     protected $fillable = ['nombre','fecha_nacimiento','direccion','edad','diagnostico','estatus','motivo_consulta','escolarizado','madre','padre'];
 
+    protected $casts = ['diagnostico' => \App\Casts\DiagnosticoCifrado::class];
+
     public function avances() { return $this->hasMany(Avance::class, 'paciente_id'); }
     public function valoraciones() { return $this->hasMany(InformeValoracion::class, 'id_paciente'); }
 }

@@ -11,4 +11,5 @@ class Informe extends Model
     public $timestamps = false;
 
     protected $guarded = [];
+    protected $casts = ['hc_diagnostico' => \App\Casts\DiagnosticoCifrado::class];
 }

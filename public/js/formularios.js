@@ -113,7 +113,7 @@
         distribucion: {
             paciente:    { l: 'Paciente', h: 'Se elige de la lista de pacientes activos.' },
             id_usuario:  { l: 'Terapeuta', h: 'Persona que atenderá al paciente.' },
-            dia_semana:  { l: 'Día de la semana', h: 'De lunes a sábado.' },
+            fecha:       { l: 'Fecha', h: 'Día exacto del horario. De lunes a sábado.' },
             hora_inicio: { l: 'Hora de inicio', h: 'Formato de 24 horas, de 07:00 a 19:59.', a: { min: '07:00', max: '19:59' } },
             hora_fin:    { l: 'Hora de fin', h: 'Debe ser posterior a la hora de inicio y no pasar de las 20:00.', a: { min: '07:01', max: '20:00' } }
         }

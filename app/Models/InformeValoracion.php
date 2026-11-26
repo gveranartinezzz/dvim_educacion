@@ -10,6 +10,7 @@ class InformeValoracion extends Model
     protected $primaryKey = 'id';
 
     protected $guarded = [];
+    protected $casts = ['hc_diagnostico' => \App\Casts\DiagnosticoCifrado::class];
     const CREATED_AT = 'fecha_registro';
     const UPDATED_AT = 'fecha_actualizacion';
     public $timestamps = true;

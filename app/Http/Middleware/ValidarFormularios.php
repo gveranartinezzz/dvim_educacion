@@ -110,7 +110,7 @@ class ValidarFormularios
 
             // Horarios
             ['#^/distribucion(/\d+)?$#', [
-                'dia_semana' => 'sometimes|required|in:Lunes,Martes,Miércoles,Jueves,Viernes,Sábado',
+                'fecha' => 'sometimes|required|date_format:Y-m-d',
                 'hora_fin' => 'sometimes|required|after:hora_inicio',
             ], ['hora_fin.after' => 'La hora de fin debe ser posterior a la hora de inicio.']],
         ];

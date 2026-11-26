@@ -19,6 +19,7 @@ class PacienteController extends Controller
 
     public function store(Request $request)
     {
+        // Sin espacios de más (evita "Ana " y "Ana" como pacientes distintos)
         if (is_string($request->input('nombre'))) {
             $request->merge(['nombre' => preg_replace('/\s+/', ' ', trim($request->input('nombre')))]);
         }
@@ -82,7 +83,7 @@ class PacienteController extends Controller
             'padre'            => 'nullable|string|max:150',
         ]);
 
-        Paciente::query()->where('id', $id)->update($data);
+        Paciente::query()->findOrFail($id)->update($data); // con el modelo, para que el diagnóstico se cifre
         return redirect('/registro')->with('ok', 'Expediente actualizado.');
     }
 
