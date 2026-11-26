@@ -18,6 +18,20 @@
     $slug = fn($d) => strtolower(strtr($d, ['á'=>'a','é'=>'e','í'=>'i','ó'=>'o','ú'=>'u']));
     $hora = fn($t) => \Carbon\Carbon::parse($t)->format('h:i a');
     $idx  = $terapeutas->pluck('id_usuario')->values()->flip();
+    $meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+    $ref   = preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) request('semana')) ? \Carbon\Carbon::parse(request('semana')) : now();
+    $lunes = $ref->copy()->startOfWeek(\Carbon\Carbon::MONDAY)->startOfDay();
+    $fechaDia = [];                                   // 'Lunes' => Carbon de esa fecha en la semana mostrada
+    foreach ($dias as $i => $nomDia) { $fechaDia[$nomDia] = $lunes->copy()->addDays($i); }
+    $ultimo = $lunes->copy()->addDays(count($dias) - 1);
+    $fmtLargo = fn ($f) => $f->day . ' de ' . $meses[$f->month - 1];
+    $esSemanaActual = $lunes->isSameDay(now()->startOfWeek(\Carbon\Carbon::MONDAY));
+    $proxima = function ($nomDia) use ($dias) {       // próxima fecha en que cae ese día (desde hoy)
+        $n = array_search($nomDia, $dias) + 1;        // lunes = 1
+        $f = now()->startOfDay();
+        while ($f->dayOfWeekIso !== $n) { $f->addDay(); }
+        return $f;
+    };
     $jsH  = $horarios->map(fn($h) => [
                 'id' => $h->id_horario, 'id_usuario' => $h->id_usuario, 'terapeuta' => $h->terapeuta,
                 'dia_semana' => $h->dia_semana,
@@ -118,7 +132,7 @@
 <div class="table-responsive">
 <table class="table table-hover align-middle mb-0">
     <thead style="background:var(--primary); color:#fff;">
-        <tr><th>Paciente</th><th>Terapeuta</th><th>Día</th><th>Horario</th><th class="text-center">Acciones</th></tr>
+        <tr><th>Paciente</th><th>Terapeuta</th><th>Día</th><th>Próxima fecha</th><th>Horas</th><th class="text-center">Acciones</th></tr>
     </thead>
     <tbody id="tablaHorarios">
     @foreach($horarios as $h)
@@ -127,7 +141,8 @@
             <td class="fw-bold">{{ $h->paciente }}</td>
             <td><i class="bi bi-person-circle me-1 text-secondary"></i> {{ $h->terapeuta }}</td>
             <td><span class="badge badge-{{ $slug($h->dia_semana) }} text-white">{{ $h->dia_semana }}</span></td>
-            <td><i class="bi bi-clock me-1 text-muted"></i> {{ $hora($h->hora_inicio) }} — {{ $hora($h->hora_fin) }}</td>
+            <td>{{ $proxima($h->dia_semana)->format('d/m/Y') }}</td>
+            <td><i class="bi bi-clock me-1 text-muted"></i> {{ substr($h->hora_inicio, 0, 5) }} – {{ substr($h->hora_fin, 0, 5) }} h</td>
             <td class="text-center text-nowrap">
                 <button class="btn btn-sm btn-outline-primary" type="button" onclick="editarHorario(this.closest('tr'))" title="Editar horario"><i class="bi bi-pencil"></i></button>
                 <button class="btn btn-sm btn-eliminar" type="button" onclick="confirmarEliminar('{{ $h->id_horario }}', @js($h->paciente))"><i class="bi bi-trash"></i></button>
@@ -172,13 +187,29 @@
 </div>
 <p class="form-text mb-3"><i class="bi bi-info-circle me-1"></i>Toca el nombre de un terapeuta para ver solo sus horarios.</p>
 
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+    <a class="btn btn-sm btn-outline-secondary" href="{{ url('/distribucion?semana=' . $lunes->copy()->subWeek()->toDateString()) }}"><i class="bi bi-chevron-left"></i> Semana anterior</a>
+    <div class="text-center fw-bold text-divm">
+        Semana del {{ $fmtLargo($lunes) }} al {{ $fmtLargo($ultimo) }} de {{ $ultimo->year }}
+        @if($esSemanaActual)<span class="badge bg-success ms-1">Esta semana</span>@endif
+    </div>
+    <div>
+        @unless($esSemanaActual)<a class="btn btn-sm btn-outline-primary" href="{{ url('/distribucion') }}">Hoy</a>@endunless
+        <a class="btn btn-sm btn-outline-secondary" href="{{ url('/distribucion?semana=' . $lunes->copy()->addWeek()->toDateString()) }}">Semana siguiente <i class="bi bi-chevron-right"></i></a>
+    </div>
+</div>
+
 <div style="overflow-x:auto;">
 <div class="calendar-grid" style="min-width:700px;">
-    <div class="cal-header" style="background:transparent;"></div>
-    @foreach($dias as $d)<div class="cal-header">{{ $d }}</div>@endforeach
+    <div class="cal-header" style="background:transparent;"><small>{{ $ultimo->year }}</small></div>
+    @foreach($dias as $d)
+        <div class="cal-header" @if($fechaDia[$d]->isToday()) style="outline:3px solid #ffc107;outline-offset:-3px;" @endif>
+            {{ $d }}<br><small style="font-weight:400">{{ $fechaDia[$d]->format('d/m/Y') }}</small>
+        </div>
+    @endforeach
 
     @for($hr = 7; $hr <= 19; $hr++)
-        <div class="cal-time">{{ $hr < 12 ? $hr.' am' : ($hr == 12 ? '12 pm' : ($hr - 12).' pm') }}</div>
+        <div class="cal-time">{{ sprintf('%02d:00', $hr) }}</div>
         @foreach($dias as $d)
             <div class="cal-cell">
             @foreach($horarios->where('dia_semana', $d) as $h)
@@ -198,14 +229,15 @@
 <span class="section-label mt-4"><i class="bi bi-table me-2"></i> Detalle Completo</span>
 <div class="table-responsive">
 <table class="table table-hover align-middle">
-    <thead style="background:var(--primary);color:#fff;"><tr><th>Día</th><th>Paciente</th><th>Terapeuta</th><th>Horario</th></tr></thead>
+    <thead style="background:var(--primary);color:#fff;"><tr><th>Día</th><th>Fecha</th><th>Paciente</th><th>Terapeuta</th><th>Horas</th></tr></thead>
     <tbody>
     @foreach($horarios->sortBy(fn($h) => array_search($h->dia_semana, $dias)) as $h)
         <tr>
             <td><span class="badge badge-{{ $slug($h->dia_semana) }} text-white">{{ $h->dia_semana }}</span></td>
+            <td>{{ $fechaDia[$h->dia_semana]->format('d/m/Y') }}</td>
             <td>{{ $h->paciente }}</td>
             <td>{{ $h->terapeuta }}</td>
-            <td>{{ $hora($h->hora_inicio) }} — {{ $hora($h->hora_fin) }}</td>
+            <td>{{ substr($h->hora_inicio, 0, 5) }} – {{ substr($h->hora_fin, 0, 5) }} h</td>
         </tr>
     @endforeach
     </tbody>
@@ -314,6 +346,10 @@ $gGuias = [
 @endsection
 
 @push('scripts')
+<script>
+// Al cambiar de semana se vuelve a abrir la pestaña Distribución
+if (/[?&]semana=/.test(location.search)) { window.addEventListener('load', function () { var t = document.getElementById('distribucion-tab'); if (t) t.click(); }); }
+</script>
 <script>
 const horariosExistentes = @json($jsH);
 

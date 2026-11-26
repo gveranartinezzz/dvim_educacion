@@ -11,6 +11,7 @@
         ['/avances',         'Avances',         'bi-graph-up-arrow',         'avances*',         false],
         ['/distribucion',    'Distribución',    'bi-calendar-week-fill',     'distribucion*',    false],
         ['/expediente',      'Expediente',      'bi-folder2-open',           'expediente*',      false],
+        ['/citas',           'Citas',           'bi-calendar-check',         'citas*',           false],
         ['/usuarios',        'Usuarios',        'bi-person-gear',            'usuarios*',        true],
         ['/bitacora',        'Bitácora',        'bi-clock-history',          'bitacora*',        true],
     ];

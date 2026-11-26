@@ -124,10 +124,6 @@
                     </a>
                 </li>
 
-                            <li class="nav-item">
-                    <a class="nav-link text-white px-3 menu-link {{ request()->is('citas*') ? 'active-link' : '' }}"
-                       href="{{ url('/citas') }}">Citas</a>
-                </li>
             </ul>
 
             <!-- =========================
