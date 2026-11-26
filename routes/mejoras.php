@@ -1,6 +1,7 @@
 <?php
 
-use App\Http\Controllers\CitaController;
+use App\Http\Controllers\HorarioController;
+use App\Http\Controllers\InicioController;
 use App\Http\Controllers\MejorasController;
 use App\Http\Middleware\SoloAdmin;
 use App\Http\Middleware\SoloSesion;
@@ -15,13 +16,14 @@ Route::group(['middleware' => [SoloSesion::class]], function () {
     Route::get('/expediente/{nombre?}', [MejorasController::class, 'expediente'])->where('nombre', '.*')->name('expediente');
     Route::get('/exportar/pacientes', [MejorasController::class, 'exportarPacientes'])->name('exportar.pacientes');
 
-    // Calendario de citas
-    Route::get('/citas', [CitaController::class, 'index'])->name('citas.index');
-    Route::post('/citas', [CitaController::class, 'store'])->name('citas.store');
-    Route::put('/citas/{id}', [CitaController::class, 'update'])->whereNumber('id')->name('citas.update');
-    Route::delete('/citas/{id}', [CitaController::class, 'destroy'])->whereNumber('id')->name('citas.destroy');
+    // Inicio editable (solo el administrador guarda cambios)
+    Route::get('/inicio', [InicioController::class, 'index'])->name('inicio');
+
+    // Distribución: editar un horario ya asignado
+    Route::put('/distribucion/{id}', [HorarioController::class, 'update'])->whereNumber('id')->name('horarios.update');
 
     Route::group(['middleware' => [SoloAdmin::class]], function () {
+        Route::post('/inicio', [InicioController::class, 'guardar'])->name('inicio.guardar');
         Route::get('/bitacora', [MejorasController::class, 'bitacora'])->name('bitacora');
     });
 });

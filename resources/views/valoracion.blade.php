@@ -40,12 +40,16 @@
 
                         <div class="titulo-banner">
 
-                            <h3 class="mb-0">
-                                <i class="bi bi-file-earmark-medical"></i>
-                                Registrar Informe de Valoración
-                            </h3>
+                    <h3>
+                        <i class="bi bi-file-earmark-medical"></i>
+                        Registrar Informe de Valoración
+                    </h3>
 
-                        </div>
+                    <p class="mb-0 small">
+                        Evaluación inicial del paciente: antecedentes, resultados por área e indicaciones
+                    </p>
+
+                </div>
 
                         <form action="{{ route('valoracion.store') }}" method="POST">
 @csrf

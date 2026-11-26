@@ -6,7 +6,16 @@
         <div class="row justify-content-center">
             <div class="col-md-8 bg-white p-4 rounded shadow-sm">
                 <div class="titulo-banner">
-                    <h3 class="mb-0">Modificar Recomendación Escolar</h3>
+
+                    <h3>
+                        <i class="bi bi-pencil-square"></i>
+                        Modificar Recomendación Escolar
+                    </h3>
+
+                    <p class="mb-0 small">
+                        Actualiza la sugerencia para la escuela
+                    </p>
+
                 </div>
 
                 <form action="{{ url('/recomendaciones/'.$rec->id) }}" method="POST">

@@ -7,7 +7,16 @@
             <div class="col-md-9 bg-white p-4 rounded shadow-sm">
                 
                 <div class="titulo-banner">
-                    <h3 class="mb-0">Modificar Plan de Intervención</h3>
+
+                    <h3>
+                        <i class="bi bi-pencil-square"></i>
+                        Modificar Plan de Intervención
+                    </h3>
+
+                    <p class="mb-0 small">
+                        Actualiza las actividades para la familia
+                    </p>
+
                 </div>
 
                 <form action="{{ url('/plan/'.$plan->id) }}" method="POST">

@@ -44,7 +44,7 @@
                         </h3>
 
                         <p class="mb-0 small">
-                            Seguimiento psicopedagógico individualizado para alumnos con discapacidad
+                            Seguimiento psicopedagógico individualizado para pacientes con discapacidad
                         </p>
 
                     </div>
@@ -60,7 +60,7 @@
                         <div class="input-group mb-2">
 
                             <span class="input-group-text">
-                                Seleccionar Alumno
+                                Paciente
                             </span>
 
                             <select name="paciente_id"
@@ -68,7 +68,7 @@
                                     required>
 
                                 <option value="" disabled selected>
-                                    Seleccione el alumno...
+                                    Seleccione al paciente...
                                 </option>
 @foreach($pacientes as $p)<option value="{{ $p->id }}" {{ old('paciente_id') == $p->id ? 'selected' : '' }}>{{ $p->nombre }}</option>@endforeach
 </select>
@@ -274,7 +274,7 @@
 
                                 <tr>
 
-                                    <th>Alumno / Paciente</th>
+                                    <th>Paciente</th>
 
                                     <th>Especialista a Cargo</th>
 
@@ -457,7 +457,7 @@ $gGuias = [
 
                     <label class="form-label fw-bold small text-muted">
 
-                        Alumno / Paciente
+                        Paciente
 
                     </label>
 

@@ -35,6 +35,7 @@
 
 <div class="titulo-banner">
     <h3 class="mb-0"><i class="bi bi-calendar-plus me-2"></i> Asignar Horario</h3>
+    <p class="mb-0 small">Define qué terapeuta atiende a cada paciente, qué día y en qué horario (lunes a sábado, de 07:00 a 20:00)</p>
 </div>
 
 <div class="conflict-alert mb-3" id="alertaConflicto">
@@ -44,7 +45,7 @@
 
 <form action="{{ route('horarios.store') }}" method="POST" id="formHorario">
 @csrf
-<span class="section-label">Información</span>
+<span class="section-label"><i class="bi bi-person-lines-fill me-2"></i>Paciente y terapeuta</span>
 
 @include('layouts.paciente_select')
 
@@ -58,7 +59,7 @@
     </select>
 </div>
 
-<span class="section-label">Horario</span>
+<span class="section-label"><i class="bi bi-clock me-2"></i>Día y horas</span>
 
 <div class="row mb-4">
     <div class="col-md-4 mb-2">
@@ -70,11 +71,11 @@
     </div>
     <div class="col-md-4 mb-2">
         <label class="form-label fw-bold text-secondary small">Hora de inicio</label>
-        <input type="time" name="hora_inicio" id="horaInicio" class="form-control" value="{{ old('hora_inicio') }}" required>
+        <input type="time" name="hora_inicio" id="horaInicio" class="form-control" min="07:00" max="19:59" value="{{ old('hora_inicio') }}" required>
     </div>
     <div class="col-md-4 mb-2">
         <label class="form-label fw-bold text-secondary small">Hora de fin</label>
-        <input type="time" name="hora_fin" id="horaFin" class="form-control" value="{{ old('hora_fin') }}" required>
+        <input type="time" name="hora_fin" id="horaFin" class="form-control" min="07:01" max="20:00" value="{{ old('hora_fin') }}" required>
     </div>
 </div>
 
@@ -121,12 +122,14 @@
     </thead>
     <tbody id="tablaHorarios">
     @foreach($horarios as $h)
-        <tr data-paciente="{{ $h->paciente }}" data-terapeuta="{{ $h->terapeuta }}" data-dia="{{ $h->dia_semana }}">
+        <tr data-paciente="{{ $h->paciente }}" data-terapeuta="{{ $h->terapeuta }}" data-dia="{{ $h->dia_semana }}"
+            data-id="{{ $h->id_horario }}" data-usuario="{{ $h->id_usuario }}" data-inicio="{{ substr($h->hora_inicio, 0, 5) }}" data-fin="{{ substr($h->hora_fin, 0, 5) }}">
             <td class="fw-bold">{{ $h->paciente }}</td>
             <td><i class="bi bi-person-circle me-1 text-secondary"></i> {{ $h->terapeuta }}</td>
             <td><span class="badge badge-{{ $slug($h->dia_semana) }} text-white">{{ $h->dia_semana }}</span></td>
             <td><i class="bi bi-clock me-1 text-muted"></i> {{ $hora($h->hora_inicio) }} — {{ $hora($h->hora_fin) }}</td>
-            <td class="text-center">
+            <td class="text-center text-nowrap">
+                <button class="btn btn-sm btn-outline-primary" type="button" onclick="editarHorario(this.closest('tr'))" title="Editar horario"><i class="bi bi-pencil"></i></button>
                 <button class="btn btn-sm btn-eliminar" type="button" onclick="confirmarEliminar('{{ $h->id_horario }}', @js($h->paciente))"><i class="bi bi-trash"></i></button>
             </td>
         </tr>
@@ -161,11 +164,13 @@
 
 <span class="section-label"><i class="bi bi-calendar-week me-2"></i> Calendario Semanal</span>
 
-<div class="d-flex flex-wrap gap-2 mb-3">
+<div class="d-flex flex-wrap gap-2 mb-2">
 @foreach($terapeutas as $i => $t)
-    <span class="badge tc-{{ $i % 8 }} px-3 py-2"><i class="bi bi-person-fill me-1"></i> {{ $t->nombre }} {{ $t->apaterno }}</span>
+    <button type="button" class="badge tc-{{ $i % 8 }} px-3 py-2 border-0" data-filtro-terapeuta="{{ $t->id_usuario }}" title="Ver solo este terapeuta"><i class="bi bi-person-fill me-1"></i> {{ $t->nombre }} {{ $t->apaterno }}</button>
 @endforeach
+<button type="button" class="badge bg-secondary px-3 py-2 border-0" data-filtro-terapeuta="" title="Ver a todos"><i class="bi bi-people-fill me-1"></i> Todos</button>
 </div>
+<p class="form-text mb-3"><i class="bi bi-info-circle me-1"></i>Toca el nombre de un terapeuta para ver solo sus horarios.</p>
 
 <div style="overflow-x:auto;">
 <div class="calendar-grid" style="min-width:700px;">
@@ -178,7 +183,7 @@
             <div class="cal-cell">
             @foreach($horarios->where('dia_semana', $d) as $h)
                 @if((int) substr($h->hora_inicio, 0, 2) === $hr)
-                    <div class="cal-event tc-{{ ($idx[$h->id_usuario] ?? 0) % 8 }}" title="{{ $h->paciente }} | {{ $h->terapeuta }} | {{ substr($h->hora_inicio,0,5) }}-{{ substr($h->hora_fin,0,5) }}">
+                    <div class="cal-event tc-{{ ($idx[$h->id_usuario] ?? 0) % 8 }}" data-terapeuta-id="{{ $h->id_usuario }}" title="{{ $h->paciente }} | {{ $h->terapeuta }} | {{ substr($h->hora_inicio,0,5) }}-{{ substr($h->hora_fin,0,5) }}">
                         <div>{{ $h->paciente }}</div>
                         <div style="opacity:.85;font-weight:400">{{ substr($h->hora_inicio,0,5) }}-{{ substr($h->hora_fin,0,5) }}</div>
                     </div>
@@ -241,6 +246,49 @@ $gGuias = [
 @include('layouts.guias', ['titulo' => $gTitulo, 'intro' => $gIntro, 'indicadores' => $gInd, 'guias' => $gGuias])
         </div>
 
+</div>
+
+<!-- ================= MODAL EDITAR ================= -->
+<div class="modal fade" id="modalEditar" tabindex="-1" aria-hidden="true">
+<div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+<form id="formEditar" method="POST" action="#">
+    @csrf @method('PUT')
+    <div class="modal-header text-white" style="background:var(--primary);">
+        <h5 class="modal-title fw-bold"><i class="bi bi-pencil-square me-2"></i> Editar Horario</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+    </div>
+    <div class="modal-body">
+        <div class="mb-3">
+            <label class="form-label fw-bold text-secondary small">Paciente</label>
+            <select name="paciente" id="edPaciente" class="form-select" required>
+                @foreach(($listaPacientes ?? []) as $p)<option value="{{ $p->nombre }}">{{ $p->nombre }}</option>@endforeach
+            </select>
+        </div>
+        <div class="mb-3">
+            <label class="form-label fw-bold text-secondary small">Terapeuta</label>
+            <select name="id_usuario" id="edTerapeuta" class="form-select" required>
+                @foreach($terapeutas as $t)<option value="{{ $t->id_usuario }}">{{ $t->nombre }} {{ $t->apaterno }}</option>@endforeach
+            </select>
+        </div>
+        <div class="mb-3">
+            <label class="form-label fw-bold text-secondary small">Día de la semana</label>
+            <select name="dia_semana" id="edDia" class="form-select" required>
+                @foreach($dias as $d)<option>{{ $d }}</option>@endforeach
+            </select>
+        </div>
+        <div class="row">
+            <div class="col-6"><label class="form-label fw-bold text-secondary small">Hora de inicio</label>
+                <input type="time" name="hora_inicio" id="edInicio" class="form-control" min="07:00" max="19:59" required></div>
+            <div class="col-6"><label class="form-label fw-bold text-secondary small">Hora de fin</label>
+                <input type="time" name="hora_fin" id="edFin" class="form-control" min="07:01" max="20:00" required></div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="submit" class="btn btn-divm"><i class="bi bi-check2-circle me-1"></i> Guardar cambios</button>
+    </div>
+</form>
+</div></div>
 </div>
 
 <!-- ================= MODAL ELIMINAR ================= -->
@@ -321,6 +369,28 @@ function limpiarFiltros() {
     document.getElementById('fDia').value = '';
     filtrarHorarios();
 }
+
+function editarHorario(fila) {
+    const d = fila.dataset;
+    const sel = (id, v) => {
+        const el = document.getElementById(id);
+        if (![...el.options].some(o => o.value === v)) el.add(new Option(v, v)); // paciente dado de baja
+        el.value = v;
+    };
+    sel('edPaciente', d.paciente); sel('edTerapeuta', d.usuario); sel('edDia', d.dia);
+    document.getElementById('edInicio').value = d.inicio;
+    document.getElementById('edFin').value = d.fin;
+    document.getElementById('formEditar').action = "{{ url('/distribucion') }}/" + d.id;
+    new bootstrap.Modal(document.getElementById('modalEditar')).show();
+}
+
+// Calendario: ver solo un terapeuta
+document.querySelectorAll('[data-filtro-terapeuta]').forEach(b => b.addEventListener('click', () => {
+    const id = b.dataset.filtroTerapeuta;
+    document.querySelectorAll('.cal-event').forEach(e => {
+        e.style.display = (!id || e.dataset.terapeutaId === id) ? '' : 'none';
+    });
+}));
 
 let idEliminar = null;
 

@@ -19,7 +19,7 @@
             edad:             { l: 'Edad (años)', h: 'Años cumplidos, de 0 a 120.', a: { min: 0, max: 120 } },
             fecha_nacimiento: { l: 'Fecha de nacimiento', h: 'Día, mes y año. No puede ser una fecha futura.', a: { max: hoy, min: '1900-01-01' } },
             calle:            { l: 'Calle y número', h: 'Ejemplo: Av. Juárez 123.', p: 'Ej. Av. Juárez 123', a: { maxlength: 150 } },
-            cp:               { l: 'Código postal', h: '5 dígitos.', p: '00000', a: { maxlength: 5, inputmode: 'numeric', pattern: '[0-9]{5}', title: 'El código postal tiene 5 números.' } },
+            cp:               { l: 'Código postal', h: '5 dígitos.', p: '00000', a: { maxlength: 5, inputmode: 'numeric', pattern: '[0-9]{5}', title: 'El código postal tiene 5 números.' }, k: 'digitos' },
             colonia:          { l: 'Colonia', a: { maxlength: 100 } },
             municipio:        { l: 'Municipio', a: { maxlength: 100 } },
             referencias:      { l: 'Referencias', h: 'Entre qué calles está, color de la casa, etc.', a: { maxlength: 255 } },
@@ -111,21 +111,11 @@
         },
 
         distribucion: {
-            id_usuario:  { l: 'Terapeuta', h: 'Persona que atenderá al paciente.' },
-            dia_semana:  { l: 'Día de la semana' },
-            hora_inicio: { l: 'Hora de inicio', h: 'Formato de 24 horas.' },
-            hora_fin:    { l: 'Hora de fin', h: 'Debe ser posterior a la hora de inicio.' }
-        },
-
-        citas: {
             paciente:    { l: 'Paciente', h: 'Se elige de la lista de pacientes activos.' },
-            id_usuario:  { l: 'Terapeuta', h: 'Quien atenderá la cita.' },
-            fecha:       { l: 'Fecha', h: 'No se pueden agendar citas en días pasados.', a: { min: hoy } },
-            hora_inicio: { l: 'Hora de inicio', h: 'Formato de 24 horas.' },
-            hora_fin:    { l: 'Hora de fin', h: 'Debe ser posterior a la hora de inicio.' },
-            motivo:      { l: 'Motivo de la cita', h: 'Ej. terapia de lenguaje, valoración inicial, entrega de informe.', a: { maxlength: 255 } },
-            notas:       { l: 'Notas', h: 'Opcional. Máximo 1,000 caracteres.', a: { maxlength: 1000 } },
-            estatus:     { l: 'Estado de la cita' }
+            id_usuario:  { l: 'Terapeuta', h: 'Persona que atenderá al paciente.' },
+            dia_semana:  { l: 'Día de la semana', h: 'De lunes a sábado.' },
+            hora_inicio: { l: 'Hora de inicio', h: 'Formato de 24 horas, de 07:00 a 19:59.', a: { min: '07:00', max: '19:59' } },
+            hora_fin:    { l: 'Hora de fin', h: 'Debe ser posterior a la hora de inicio y no pasar de las 20:00.', a: { min: '07:01', max: '20:00' } }
         }
     };
 
@@ -137,7 +127,7 @@
         'Registrar Paciente': 'Nuevo paciente', 'Consultar Historial': 'Lista de pacientes', 'Búsqueda y Filtros': 'Buscar y filtrar',
         'Nuevo Plan': 'Nuevo plan de trabajo', 'Planes Registrados': 'Planes guardados',
         'Identificación del Paciente': 'Datos del paciente', 'Áreas de Intervención Especializada': 'Áreas de trabajo',
-        'Identificación del Alumno': 'Datos del alumno', 'Información Académica': 'Escuela y nivel',
+        'Identificación del Alumno': 'Datos del paciente', 'Información Académica': 'Escuela y nivel',
         'Detalles de la Sugerencia': 'Recomendación', 'Enviar Nota': 'Nueva recomendación',
         'Banco de Estrategias': 'Estrategias sugeridas', 'Búsqueda por Grado': 'Buscar por nivel',
         'Recomendaciones Escolares Emitidas': 'Recomendaciones guardadas',
@@ -154,7 +144,7 @@
         'Datos de Control': 'Datos de la sesión', 'Evaluación Cualitativa e Intervención': 'Qué se hizo y cómo respondió',
         'Registrar Avance': 'Nueva sesión', 'Historial de Sesiones': 'Sesiones registradas',
         'Expediente Pedagógico': 'Expediente del paciente', 'Historial General de Intervenciones': 'Todas las sesiones',
-        'Asignar Horario': 'Nuevo horario', 'Información': 'Terapeuta', 'Horario': 'Día y horas',
+        'Asignar Horario': 'Asignar horario',
         'Distribución de Horarios': 'Horarios asignados', 'Calendario Semanal': 'Semana de trabajo',
         'Registrar Usuario': 'Nuevo usuario', 'Lista de Usuarios': 'Usuarios registrados',
         'Datos Personales': 'Datos de la persona', 'Acceso al Sistema': 'Acceso al sistema',
@@ -162,8 +152,8 @@
     };
 
     var MODULO = (function () {
-        var m = location.pathname.match(/\/(registro|plan|recomendaciones|informe|valoracion|avances|usuarios|distribucion|citas)(?:\/|$)/);
-        return m ? m[1] : null;
+        var m = location.pathname.match(/\/(registro|plan|recomendaciones|informe|valoracion|avances|usuarios|distribucion|crear-cuenta)(?:\/|$)/);
+        return m ? (m[1] === 'crear-cuenta' ? 'usuarios' : m[1]) : null;
     })();
 
     function soloTexto(el) {
@@ -221,6 +211,87 @@
         });
     }
 
+
+    /* ---------- Encabezado igual en todos los formularios (icono, título y subtítulo) ---------- */
+    var SUBTITULOS = {
+        'Expediente del Paciente': ['bi-file-earmark-person', 'Datos generales, domicilio y familia de cada paciente'],
+        'Plan de Intervención para Padres': ['bi-journal-text', 'Actividades para que la familia practique en casa con el paciente'],
+        'Registrar Recomendación Escolar': ['bi-chat-left-text', 'Sugerencias para que la escuela apoye al paciente en el aula'],
+        'Registro de Informe Pedagógico': ['bi-file-earmark-pdf', 'Resumen del desempeño y las indicaciones para la familia y la escuela'],
+        'Registrar Informe de Valoración': ['bi-file-earmark-medical', 'Resultados de la evaluación inicial por áreas de desarrollo'],
+        'Registrar Nuevo Usuario': ['bi-person-plus-fill', 'Alta de personal con acceso al sistema'],
+        'Roles y Permisos': ['bi-shield-lock-fill', 'Qué puede hacer cada rol dentro del sistema'],
+        'Asignar Horario': ['bi-calendar-plus', 'Define qué terapeuta atiende a cada paciente, qué día y en qué horario'],
+        'Registro de Evolución y Avances Diarios': ['bi-clipboard-pulse', 'Seguimiento psicopedagógico individualizado para pacientes con discapacidad'],
+        'Modificar Expediente del Paciente': ['bi-pencil-square', 'Corrige los datos y guarda los cambios'],
+        'Modificar Plan de Intervención': ['bi-pencil-square', 'Corrige las actividades y guarda los cambios'],
+        'Modificar Informe Pedagógico': ['bi-pencil-square', 'Corrige el informe y guarda los cambios'],
+        'Modificar Recomendación Escolar': ['bi-pencil-square', 'Corrige la recomendación y guarda los cambios'],
+        'Actualizar Información de Usuario': ['bi-pencil-square', 'Cambia los datos de la persona y guarda los cambios']
+    };
+
+    function aplicarEncabezados() {
+        document.querySelectorAll('main .titulo-banner h3, main .titulo-panel h3, main h2.titulo-principal, main h3.text-center').forEach(function (h) {
+            var clave = soloTexto(h), info = SUBTITULOS[clave];
+            if (!info || h.dataset.encabezado) return;
+            h.dataset.encabezado = '1';
+            h.style.color = ''; h.classList.add('titulo-formulario');
+            if (!h.querySelector('i')) { var i = document.createElement('i'); i.className = 'bi ' + info[0] + ' me-2'; h.insertBefore(i, h.firstChild); }
+            var cont = h.parentElement, ya = cont.querySelector(':scope > p.subtitulo-formulario, :scope > p.small');
+            if (!ya) {
+                var p = document.createElement('p');
+                p.className = 'subtitulo-formulario mb-3';
+                p.textContent = info[1];
+                h.insertAdjacentElement('afterend', p);
+            }
+        });
+    }
+
+    /* ---------- Siempre "paciente" (nunca "alumno") ---------- */
+    function aPaciente() {
+        var raiz = document.querySelector('main') || document.body;
+        var w = document.createTreeWalker(raiz, NodeFilter.SHOW_TEXT, null), n, lista = [];
+        while ((n = w.nextNode())) { if (/alumn[oa]s?/i.test(n.nodeValue) && !/^(SCRIPT|STYLE|TEXTAREA)$/.test(n.parentNode.nodeName)) lista.push(n); }
+        lista.forEach(function (t) {
+            t.nodeValue = t.nodeValue
+                .replace(/Seleccionar Alumno/g, 'Paciente')
+                .replace(/Seleccione el alumno/g, 'Seleccione al paciente')
+                .replace(/\bAlumnos\b/g, 'Pacientes').replace(/\balumnos\b/g, 'pacientes')
+                .replace(/\bAlumno\b/g, 'Paciente').replace(/\balumno\b/g, 'paciente')
+                .replace(/\bAlumnas\b/g, 'Pacientes').replace(/\balumnas\b/g, 'pacientes')
+                .replace(/\bAlumna\b/g, 'Paciente').replace(/\balumna\b/g, 'paciente');
+        });
+        document.querySelectorAll('main option').forEach(function (o) {
+            if (/alumn/i.test(o.textContent) && !o.value) o.textContent = o.textContent.replace(/el alumno/i, 'al paciente').replace(/alumno/i, 'paciente');
+        });
+    }
+
+    /* ---------- Solo se puede escribir lo que corresponde a cada campo ---------- */
+    var FILTROS = {
+        nombre:   /[^\p{L}\p{M}\s.'’\-]/gu,   // sin números ni símbolos
+        digitos:  /\D/g,                         // solo números
+        telefono: /[^0-9+\-\s()]/g
+    };
+
+    function restringir(ctl) {
+        var f = FILTROS[ctl.dataset.tipo];
+        if (f) {
+            ctl.addEventListener('input', function () {
+                var limpio = ctl.value.replace(f, '');
+                if (limpio !== ctl.value) { var pos = ctl.selectionStart - (ctl.value.length - limpio.length); ctl.value = limpio; try { ctl.setSelectionRange(pos, pos); } catch (e) {} }
+            });
+        }
+        if (ctl.type === 'number') {
+            ctl.addEventListener('keydown', function (e) { if (['e', 'E', '+', '-', '.', ','].indexOf(e.key) > -1) e.preventDefault(); });
+            ctl.addEventListener('input', function () {
+                var v = ctl.value; if (v === '') return;
+                if (ctl.max !== '' && +v > +ctl.max) ctl.value = ctl.max;
+                if (ctl.min !== '' && +v < +ctl.min && v.length >= String(ctl.min).length + 1) ctl.value = ctl.min;
+            });
+        }
+        if (ctl.matches('input[type=date]')) { ctl.addEventListener('keydown', function (e) { if (e.key.length === 1 && /\D/.test(e.key)) e.preventDefault(); }); }
+    }
+
     /* ---------- Validación en el navegador (en español) ---------- */
     function mensaje(ctl) {
         var v = ctl.validity;
@@ -268,6 +339,7 @@
         form.setAttribute('novalidate', 'novalidate');
         var campos = form.querySelectorAll('input:not([type=hidden]):not([type=submit]), select, textarea');
         campos.forEach(function (c) {
+            restringir(c);
             c.addEventListener('input', function () { reglasPropias(c); horas(form); if (c.classList.contains('is-invalid')) mostrarError(c); });
             c.addEventListener('blur', function () { reglasPropias(c); horas(form); if (c.value) mostrarError(c); });
             reglasPropias(c);
@@ -347,10 +419,38 @@
         });
     }
 
+    /* ---------- Solo se puede escribir lo que corresponde a cada campo ---------- */
+    function restringir(ctl) {
+        if (ctl.dataset.filtro) return; ctl.dataset.filtro = '1';
+        var tipo = ctl.dataset.tipo, num = ctl.type === 'number' || ctl.getAttribute('inputmode') === 'numeric';
+        if (tipo === 'nombre') {
+            ctl.addEventListener('input', function () {
+                var l = ctl.value.replace(/[^\p{L}\p{M}\s.'’\-]/gu, '').replace(/\s{2,}/g, ' ');
+                if (l !== ctl.value) ctl.value = l;
+            });
+        }
+        if (num) {
+            ctl.addEventListener('keydown', function (e) {
+                if (ctl.type === 'number' && /^[eE+\-.,]$/.test(e.key)) e.preventDefault();
+            });
+            ctl.addEventListener('input', function () {
+                var l = ctl.value.replace(/\D/g, '');
+                if (ctl.type !== 'number' && l !== ctl.value) ctl.value = l;
+            });
+        }
+        if (ctl.matches('textarea, input[type=text]') && !tipo) {
+            ctl.addEventListener('input', function () {
+                var l = ctl.value.replace(/[<>\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '');
+                if (l !== ctl.value) ctl.value = l;
+            });
+        }
+    }
+
     function iniciar() {
-        aplicarCampos(); aplicarTextos();
+        aplicarCampos(); aplicarTextos(); aplicarEncabezados(); aPaciente();
         document.querySelectorAll('main form, #content form').forEach(function (f) {
             if (f.method && f.method.toLowerCase() === 'get') return;
+            f.querySelectorAll('input:not([type=hidden]):not([type=password]), textarea').forEach(restringir);
             conectarValidacion(f); conectarConfirmacion(f);
             if (!f.querySelector('input[name="_method"]') || true) evitarDobleEnvio(f);
         });

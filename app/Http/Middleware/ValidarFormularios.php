@@ -109,7 +109,7 @@ class ValidarFormularios
             ], $msgNombre + $msgClave],
 
             // Horarios
-            ['#^/distribucion$#', [
+            ['#^/distribucion(/\d+)?$#', [
                 'dia_semana' => 'sometimes|required|in:Lunes,Martes,Miércoles,Jueves,Viernes,Sábado',
                 'hora_fin' => 'sometimes|required|after:hora_inicio',
             ], ['hora_fin.after' => 'La hora de fin debe ser posterior a la hora de inicio.']],

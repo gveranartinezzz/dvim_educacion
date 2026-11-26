@@ -20,17 +20,18 @@
 
         <div class="card-table mb-4">
 
-            <div class="titulo-panel">
+            <div class="titulo-banner">
 
-                <h3 class="mb-0">
+                    <h3>
+                        <i class="bi bi-file-earmark-person"></i>
+                        Expediente del Paciente
+                    </h3>
 
-                    <i class="bi bi-file-earmark-person me-2"></i>
+                    <p class="mb-0 small">
+                        Registro de los datos generales, domicilio y familia de cada paciente
+                    </p>
 
-                    Expediente del Paciente
-
-                </h3>
-
-            </div>
+                </div>
 
             <form action="{{ route('pacientes.store') }}" method="POST">
 @csrf

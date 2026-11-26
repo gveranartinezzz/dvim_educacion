@@ -5,7 +5,18 @@
 <div class="container my-5">
         <div class="row justify-content-center">
             <div class="col-md-7 bg-white p-4 rounded shadow">
-                <h3 class="text-center mb-4" style="color: #c5005a;">Actualizar Información de Usuario</h3>
+                <div class="titulo-banner">
+
+                    <h3>
+                        <i class="bi bi-person-gear"></i>
+                        Actualizar Información de Usuario
+                    </h3>
+
+                    <p class="mb-0 small">
+                        Cambia los datos de la cuenta; deja la contraseña vacía para conservar la actual
+                    </p>
+
+                </div>
                 
                 <form action="{{ url('/usuarios/'.$usuario->id_usuario) }}" method="POST">
 @csrf

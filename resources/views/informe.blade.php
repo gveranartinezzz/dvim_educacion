@@ -36,12 +36,16 @@
 
                         <div class="titulo-banner">
 
-                            <h3 class="mb-0">
-                                <i class="bi bi-file-earmark-pdf"></i>
-                                Registro de Informe Pedagógico
-                            </h3>
+                    <h3>
+                        <i class="bi bi-file-earmark-pdf"></i>
+                        Registro de Informe Pedagógico
+                    </h3>
 
-                        </div>
+                    <p class="mb-0 small">
+                        Resultados de la evaluación del paciente con indicaciones para la familia y la escuela
+                    </p>
+
+                </div>
 
                         <form action="{{ route('informes.store') }}" method="POST">
 @csrf

@@ -47,16 +47,3 @@ a:focus-visible, button:focus-visible, .form-control:focus-visible, .form-select
 .campo-ayuda { font-size: .8rem; color: #6c757d; margin-top: .25rem; }
 .campo-error { font-size: .8rem; color: #b02a37; margin-top: .25rem; font-weight: 600; }
 .is-invalid { border-color: #dc3545 !important; }
-
-/* ---- Calendario de citas ---- */
-.cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
-.cal-head { text-align: center; font-weight: 700; font-size: .8rem; color: #6c757d; padding: 4px 0; }
-.cal-dia { min-height: 92px; border: 1px solid #dee2e6; border-radius: 8px; padding: 4px; background: #fff; text-decoration: none; color: inherit; display: flex; flex-direction: column; gap: 2px; overflow: hidden; }
-.cal-dia.vacio { background: transparent; border-color: transparent; }
-.cal-dia:not(.vacio):hover { border-color: #0d6efd; }
-.cal-dia.hoy { border: 2px solid #0d6efd; }
-.cal-dia.sel { background: #e7f1ff; }
-.cal-dia .num { font-weight: 700; font-size: .8rem; }
-.cal-cita { color: #fff; border-radius: 4px; font-size: .65rem; padding: 0 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.cal-mas { font-size: .65rem; color: #6c757d; }
-@media (max-width: 576px) { .cal-dia { min-height: 56px; } .cal-cita { display: none; } }

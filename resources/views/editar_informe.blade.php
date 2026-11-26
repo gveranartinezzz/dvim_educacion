@@ -7,7 +7,16 @@
             <div class="col-md-10 bg-white p-4 rounded shadow-sm">
                 
                 <div class="titulo-banner">
-                    <h3 class="mb-0">Modificar Informe Pedagógico</h3>
+
+                    <h3>
+                        <i class="bi bi-pencil-square"></i>
+                        Modificar Informe Pedagógico
+                    </h3>
+
+                    <p class="mb-0 small">
+                        Corrige el informe y guarda los cambios
+                    </p>
+
                 </div>
 
                 <form action="{{ url('/informe/'.$inf->id) }}" method="POST">

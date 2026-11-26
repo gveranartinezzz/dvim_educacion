@@ -24,7 +24,18 @@
 <div class="tab-pane fade show active" id="panel-nuevo" role="tabpanel">
 <div class="container my-5">
         <div class="form-container mx-auto">
-            <h2 class="text-center mb-4 titulo-principal">Plan de Intervención para Padres</h2>
+            <div class="titulo-banner">
+
+                    <h3>
+                        <i class="bi bi-journal-text"></i>
+                        Plan de Intervención para Padres
+                    </h3>
+
+                    <p class="mb-0 small">
+                        Actividades por área que la familia practicará en casa con el paciente
+                    </p>
+
+                </div>
 
             <form action="{{ route('planes.store') }}" method="POST">
 @csrf

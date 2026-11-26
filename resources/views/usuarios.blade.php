@@ -23,11 +23,17 @@
 
             <div class="card-table mb-4">
 
-                <div class="titulo-panel">
-                    <h3 class="mb-0">
-                        <i class="bi bi-person-plus-fill me-2"></i>
+                <div class="titulo-banner">
+
+                    <h3>
+                        <i class="bi bi-person-plus-fill"></i>
                         Registrar Nuevo Usuario
                     </h3>
+
+                    <p class="mb-0 small">
+                        Crea la cuenta de una persona del equipo y define qué puede hacer en el sistema
+                    </p>
+
                 </div>
 
                 <form action="{{ route('usuarios.store') }}" method="POST">
@@ -161,11 +167,17 @@
 
             <div class="card-table mb-4">
 
-                <div class="titulo-panel">
-                    <h3 class="mb-0">
-                        <i class="bi bi-shield-lock-fill me-2"></i>
+                <div class="titulo-banner">
+
+                    <h3>
+                        <i class="bi bi-shield-lock-fill"></i>
                         Roles y Permisos
                     </h3>
+
+                    <p class="mb-0 small">
+                        Qué puede hacer cada rol dentro del sistema
+                    </p>
+
                 </div>
 
                 <div class="table-responsive">

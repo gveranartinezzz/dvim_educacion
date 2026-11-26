@@ -35,8 +35,17 @@
                     <div class="col-md-11 bg-white p-4 rounded shadow-sm">
                         
                         <div class="titulo-banner">
-                            <h3 class="mb-0"><i class="bi bi-chat-left-text"></i> Registrar Recomendación Escolar</h3>
-                        </div>
+
+                    <h3>
+                        <i class="bi bi-chat-left-text"></i>
+                        Registrar Recomendación Escolar
+                    </h3>
+
+                    <p class="mb-0 small">
+                        Sugerencias pedagógicas para que la escuela apoye al paciente en el aula
+                    </p>
+
+                </div>
 
                         <form action="{{ route('recomendaciones.store') }}" method="POST">
 @csrf
