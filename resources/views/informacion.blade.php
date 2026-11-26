@@ -4,6 +4,7 @@
 
 @section('content')
 @php
+    $c = $c ?? app(\App\Http\Controllers\InicioController::class)->datos();
     $esAdmin  = session('rol') === 'Administrador';
     $dom      = preg_replace('/\s+/', ' ', (string) $c['domicilio']);
     $mapaUrl  = 'https://www.google.com/maps/search/?api=1&query=' . urlencode($dom);

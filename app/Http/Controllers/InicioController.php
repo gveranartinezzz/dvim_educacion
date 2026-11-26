@@ -47,6 +47,12 @@ class InicioController extends Controller
         return $v;
     }
 
+    /** Textos del centro (también los usa la vista si se abre sin pasar por index). */
+    public function datos(): array
+    {
+        return $this->valores();
+    }
+
     public function index()
     {
         return view('informacion', ['c' => $this->valores()]);
