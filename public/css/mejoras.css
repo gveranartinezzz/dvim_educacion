@@ -47,3 +47,26 @@ a:focus-visible, button:focus-visible, .form-control:focus-visible, .form-select
 .campo-ayuda { font-size: .8rem; color: #6c757d; margin-top: .25rem; }
 .campo-error { font-size: .8rem; color: #b02a37; margin-top: .25rem; font-weight: 600; }
 .is-invalid { border-color: #dc3545 !important; }
+
+/* ---- Distribución: agenda ---- */
+.agenda-dias { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
+.agenda-dia { border: 2px solid #dee2e6; background: #fff; border-radius: 10px; padding: 6px 2px; text-align: center; cursor: pointer; line-height: 1.15; transition: .15s; }
+.agenda-dia .n { display: block; font-weight: 700; color: #84063e; }
+.agenda-dia .f { display: block; font-size: .7rem; color: #6c757d; }
+.agenda-dia:hover { border-color: #84063e; }
+.agenda-dia.activo { background: #84063e; border-color: #84063e; }
+.agenda-dia.activo .n, .agenda-dia.activo .f { color: #fff; }
+.agenda-caja { border: 1px solid #e3c7d6; border-radius: 12px; background: #fffafc; padding: 12px; }
+.agenda-titulo { font-weight: 700; color: #84063e; margin-bottom: 10px; }
+.agenda-linea { position: relative; height: 728px; margin-left: 52px; border-left: 2px solid #84063e; }
+.agenda-hora { position: absolute; left: 0; right: 0; border-top: 1px dashed #e3c7d6; }
+.agenda-hora span { position: absolute; left: -52px; top: -9px; width: 46px; text-align: right; font-size: .75rem; color: #6c757d; background: #fffafc; }
+.agenda-bloques { position: absolute; inset: 0 0 0 6px; }
+.agenda-bloque { position: absolute; left: 0; right: 0; border-radius: 8px; padding: 2px 8px; color: #fff; overflow: hidden; font-size: .8rem; line-height: 1.2; box-shadow: 0 1px 3px rgba(0,0,0,.15); }
+.agenda-bloque small { display: block; opacity: .9; }
+.agenda-bloque.ocupado { background: #84063e; }
+.agenda-bloque.choque { background: #dc3545; }
+.agenda-bloque.nuevo { background: rgba(25,135,84,.9); left: 35%; border: 2px dashed #fff; z-index: 2; }
+.agenda-bloque.nuevo.choque { background: rgba(220,53,69,.9); }
+.agenda-leyenda { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 10px; }
+@media (max-width: 576px) { .agenda-linea { height: 728px; } }

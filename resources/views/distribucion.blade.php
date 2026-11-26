@@ -34,7 +34,7 @@
     };
     $jsH  = $horarios->map(fn($h) => [
                 'id' => $h->id_horario, 'id_usuario' => $h->id_usuario, 'terapeuta' => $h->terapeuta,
-                'dia_semana' => $h->dia_semana,
+                'dia_semana' => $h->dia_semana, 'paciente' => $h->paciente,
                 'hora_inicio' => substr($h->hora_inicio, 0, 5), 'hora_fin' => substr($h->hora_fin, 0, 5),
             ])->values();
 @endphp
@@ -45,11 +45,11 @@
 <!-- ================= ASIGNAR HORARIO ================= -->
 <div class="tab-pane fade show active" id="panel-enviar">
 <div class="container-fluid"><div class="row justify-content-center">
-<div class="col-md-10 bg-white p-4 rounded shadow-sm">
+<div class="col-xl-11 bg-white p-4 rounded shadow-sm">
 
 <div class="titulo-banner">
-    <h3 class="mb-0"><i class="bi bi-calendar-plus me-2"></i> Asignar Horario</h3>
-    <p class="mb-0 small">Define qué terapeuta atiende a cada paciente, qué día y en qué horario (lunes a sábado, de 07:00 a 20:00)</p>
+    <h3><i class="bi bi-calendar-plus"></i> Asignar Horario</h3>
+    <p class="mb-0 small">Elige al paciente, al terapeuta, el día y la hora; a la derecha ves cómo queda en la agenda (lunes a sábado, de 07:00 a 20:00)</p>
 </div>
 
 <div class="conflict-alert mb-3" id="alertaConflicto">
@@ -57,9 +57,13 @@
     <strong>Posible conflicto detectado:</strong> <span id="textoConflicto"></span>
 </div>
 
+<div class="row g-4">
+
+<!-- ===== Formulario ===== -->
+<div class="col-lg-5">
 <form action="{{ route('horarios.store') }}" method="POST" id="formHorario">
 @csrf
-<span class="section-label"><i class="bi bi-person-lines-fill me-2"></i>Paciente y terapeuta</span>
+<span class="section-label"><i class="bi bi-person-lines-fill me-2"></i>1. Paciente y terapeuta</span>
 
 @include('layouts.paciente_select')
 
@@ -73,28 +77,62 @@
     </select>
 </div>
 
-<span class="section-label"><i class="bi bi-clock me-2"></i>Día y horas</span>
+<span class="section-label"><i class="bi bi-calendar-day me-2"></i>2. Día de la semana</span>
+<input type="hidden" name="dia_semana" id="selectDia" value="{{ old('dia_semana') }}" required>
+<div class="agenda-dias mb-4" id="chipsDia">
+@foreach($dias as $d)
+    <button type="button" class="agenda-dia {{ old('dia_semana') === $d ? 'activo' : '' }}" data-dia="{{ $d }}">
+        <span class="n">{{ mb_substr($d, 0, 3) }}</span>
+        <span class="f">{{ $proxima($d)->format('d/m') }}</span>
+    </button>
+@endforeach
+</div>
 
-<div class="row mb-4">
-    <div class="col-md-4 mb-2">
-        <label class="form-label fw-bold text-secondary small">Día de la semana</label>
-        <select name="dia_semana" class="form-select" id="selectDia" required>
-            <option value="" disabled selected>Seleccionar día</option>
-            @foreach($dias as $d)<option {{ old('dia_semana') == $d ? 'selected' : '' }}>{{ $d }}</option>@endforeach
-        </select>
-    </div>
-    <div class="col-md-4 mb-2">
+<span class="section-label"><i class="bi bi-clock me-2"></i>3. Horas</span>
+<div class="row mb-2">
+    <div class="col-6">
         <label class="form-label fw-bold text-secondary small">Hora de inicio</label>
-        <input type="time" name="hora_inicio" id="horaInicio" class="form-control" min="07:00" max="19:59" value="{{ old('hora_inicio') }}" required>
+        <input type="time" name="hora_inicio" id="horaInicio" class="form-control" min="07:00" max="19:59" step="900" value="{{ old('hora_inicio') }}" required>
     </div>
-    <div class="col-md-4 mb-2">
+    <div class="col-6">
         <label class="form-label fw-bold text-secondary small">Hora de fin</label>
-        <input type="time" name="hora_fin" id="horaFin" class="form-control" min="07:01" max="20:00" value="{{ old('hora_fin') }}" required>
+        <input type="time" name="hora_fin" id="horaFin" class="form-control" min="07:01" max="20:00" step="900" value="{{ old('hora_fin') }}" required>
     </div>
+</div>
+<div class="d-flex flex-wrap align-items-center gap-2 mb-4">
+    <span class="small text-muted">Duración rápida:</span>
+    @foreach([30 => '30 min', 45 => '45 min', 60 => '1 hora', 90 => '1 h 30', 120 => '2 horas'] as $min => $txt)
+        <button type="button" class="btn btn-sm btn-outline-secondary" data-duracion="{{ $min }}">{{ $txt }}</button>
+    @endforeach
 </div>
 
 <button type="submit" class="btn btn-custom w-100 py-3 fs-6"><i class="bi bi-check-circle me-2"></i> GUARDAR HORARIO</button>
 </form>
+</div>
+
+<!-- ===== Agenda del día ===== -->
+<div class="col-lg-7">
+    <div class="agenda-caja">
+        <div class="agenda-titulo">
+            <i class="bi bi-journal-bookmark-fill me-2"></i>
+            <span id="agendaTitulo">Agenda</span>
+        </div>
+        <div class="agenda-linea" id="agendaLinea">
+            @for($hr = 7; $hr <= 19; $hr++)
+                <div class="agenda-hora" style="top: {{ ($hr - 7) * 56 }}px"><span>{{ sprintf('%02d:00', $hr) }}</span></div>
+            @endfor
+            <div class="agenda-hora" style="top: {{ 13 * 56 }}px"><span>20:00</span></div>
+            <div class="agenda-bloques" id="agendaBloques"></div>
+        </div>
+        <div class="agenda-leyenda small text-muted">
+            <span><i class="bi bi-square-fill" style="color:#84063e"></i> Ya ocupado</span>
+            <span><i class="bi bi-square-fill text-success"></i> Tu nuevo horario</span>
+            <span><i class="bi bi-square-fill text-danger"></i> Se empalma</span>
+        </div>
+    </div>
+</div>
+
+</div>
 
 </div></div></div>
 </div>
@@ -385,6 +423,75 @@ function verificarConflicto() {
 
 ['selectTerapeuta', 'selectDia', 'horaInicio', 'horaFin'].forEach(id =>
     document.getElementById(id)?.addEventListener('change', verificarConflicto));
+
+/* ---------- Agenda del día (vista previa al asignar) ---------- */
+const PX_HORA = 56, HORA_0 = 7 * 60;
+const aMin = t => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
+const aHora = m => String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0');
+
+function pintarAgenda() {
+    const idT  = document.getElementById('selectTerapeuta').value;
+    const dia  = document.getElementById('selectDia').value;
+    const ini  = document.getElementById('horaInicio').value;
+    const fin  = document.getElementById('horaFin').value;
+    const caja = document.getElementById('agendaBloques');
+    const nomT = document.getElementById('selectTerapeuta').selectedOptions[0];
+    document.getElementById('agendaTitulo').textContent =
+        (dia ? 'Agenda del ' + dia : 'Elige un día para ver la agenda') + (idT && nomT ? ' · ' + nomT.textContent.trim() : ' · todos los terapeutas');
+    caja.innerHTML = '';
+    if (!dia) return;
+
+    const dibujar = (i, f, clase, titulo, detalle) => {
+        const el = document.createElement('div');
+        el.className = 'agenda-bloque ' + clase;
+        el.style.top = ((i - HORA_0) / 60 * PX_HORA) + 'px';
+        el.style.height = Math.max(((f - i) / 60 * PX_HORA) - 2, 18) + 'px';
+        el.innerHTML = '<strong></strong><small></small>';
+        el.firstChild.textContent = titulo;
+        el.lastChild.textContent = detalle;
+        caja.appendChild(el);
+    };
+
+    let hayChoque = false;
+    const nI = ini ? aMin(ini) : null, nF = fin ? aMin(fin) : null;
+    const valido = nI !== null && nF !== null && nF > nI;
+
+    horariosExistentes.filter(h => h.dia_semana === dia && (!idT || String(h.id_usuario) === String(idT)))
+        .forEach(h => {
+            const i = aMin(h.hora_inicio), f = aMin(h.hora_fin);
+            const choca = valido && nI < f && nF > i;
+            if (choca) hayChoque = true;
+            dibujar(i, f, choca ? 'choque' : 'ocupado', h.paciente || 'Ocupado', h.hora_inicio + ' – ' + h.hora_fin + (idT ? '' : ' · ' + h.terapeuta));
+        });
+
+    if (valido) {
+        dibujar(nI, nF, hayChoque ? 'nuevo choque' : 'nuevo', 'Nuevo horario', ini + ' – ' + fin);
+    }
+}
+
+document.querySelectorAll('#chipsDia .agenda-dia').forEach(b => b.addEventListener('click', () => {
+    document.querySelectorAll('#chipsDia .agenda-dia').forEach(x => x.classList.remove('activo'));
+    b.classList.add('activo');
+    const inp = document.getElementById('selectDia');
+    inp.value = b.dataset.dia;
+    inp.dispatchEvent(new Event('change'));
+}));
+
+document.querySelectorAll('[data-duracion]').forEach(b => b.addEventListener('click', () => {
+    const ini = document.getElementById('horaInicio');
+    if (!ini.value) { ini.focus(); return; }
+    const f = Math.min(aMin(ini.value) + Number(b.dataset.duracion), 20 * 60);
+    const fin = document.getElementById('horaFin');
+    fin.value = aHora(f);
+    fin.dispatchEvent(new Event('change'));
+}));
+
+['selectTerapeuta', 'selectDia', 'horaInicio', 'horaFin'].forEach(id => {
+    const el = document.getElementById(id);
+    el?.addEventListener('change', pintarAgenda);
+    el?.addEventListener('input', pintarAgenda);
+});
+pintarAgenda();
 
 function filtrarHorarios() {
     const paciente  = document.getElementById('fPaciente').value.toLowerCase();
